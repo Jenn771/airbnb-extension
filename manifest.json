@@ -1,0 +1,17 @@
+{
+    "manifest_version": 3,
+    "name": "Airbnb Date Price Scanner",
+    "version": "1.0.0",
+    "description": "Scans Airbnb listings for best price combinations",
+    "icons": {
+        "128": "assets/icon128.png"
+    },
+    "permissions": ["scripting"],
+    "host_permissions": ["https://www.airbnb.com/*"],
+    "content_scripts": [
+    {
+        "matches": ["https://www.airbnb.com/*"],
+        "js": ["src/content.js"]
+    }
+    ]
+}
