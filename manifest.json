@@ -6,8 +6,14 @@
     "icons": {
         "128": "assets/icon128.png"
     },
-    "permissions": ["scripting"],
+    "permissions": ["scripting", "tabs"],
     "host_permissions": ["https://www.airbnb.com/*"],
+    "action": {
+        "default_popup": "src/popup.html",
+        "default_icon": {
+        "128": "assets/icon128.png"
+        }
+    },
     "content_scripts": [
     {
         "matches": ["https://www.airbnb.com/*"],
