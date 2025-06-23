@@ -1,5 +1,14 @@
 console.log("Airbnb Extension is running");
 
+// Listen for incoming messages sent from popup.js
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === "SET_NIGHTS") {
+        // Extract the number of nights from the message
+        const nights = message.nights;
+        console.log(`Received number of nights from popup: ${nights}`);
+    }
+});
+    
 setTimeout(() => {
     // Select all listing cards on the Airbnb search results page 
     // Using Airbnb's data-testid attribute
