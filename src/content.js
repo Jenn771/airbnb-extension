@@ -12,6 +12,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         // Get current search parameters
         searchParams = getAirbnbSearchParams();
         console.log('Search parameters:', searchParams);
+
+        // Start processing each listing
+        processAllListings();
     }
 });
 
@@ -47,6 +50,35 @@ function getAirbnbSearchParams() {
     };
     
     return searchParams;
+}
+
+// Loop through all the listings on the current page and call other functions
+async function processAllListings() {
+    const listings = document.querySelectorAll('[data-testid="card-container"]');
+    console.log(`Found ${listings.length} listings to process`);
+
+    // loop through each listing
+    for (let i = 0; i < listings.length; i++) {
+        const listing = listings[i];
+        const listingData = extractListingBasicInfo(listing, i); // call extractListingBasicInfo() to get the listing data
+
+        if (listingData.link !== "No link") {
+            console.log(`Processing listing ${i + 1}: ${listingData.title}`);
+
+        }
+    }
+}
+
+function extractListingBasicInfo (listing, index) {
+    // Get listing title using the listing-card-title test id
+    const titleElement = listing.querySelector('[data-testid="listing-card-title"]');
+    const title = titleElement ? titleElement.innerText : "No title";
+
+    // Extract the link to the full listing
+    const linkElement = listing.querySelector('a');
+    const link = linkElement ? linkElement.href : "No link";
+
+    return { title, link, index };
 }
 
 setTimeout(() => {
