@@ -8,7 +8,41 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.log(`Received number of nights from popup: ${nights}`);
     }
 });
+
+// Function to extract search parameters from current Airbnb URL
+function getAirbnbSearchParams() {
+    // Get the current page's full URL
+    const currentURL = window.location.href;
+
+    // Use the URL object to easily access query parameters
+    const url = new URL(currentURL);
+    const urlParams = url.searchParams;
+
+    // Extract only the relevant search parameters used in flexible date searches
+    const searchParams = {
+
+        place_id: urlParams.get('place_id') || '',
+
+        // Confirms this is a flexible date search (should be "flexible_dates")
+        date_picker_type: urlParams.get('date_picker_type'),
+
+        // DATE PARAMETERS
+        flexible_trip_lengths: urlParams.get('flexible_trip_lengths'), // e.g., "one_week" or "weekend_trip" or "one_month"
+        flexible_trip_dates: urlParams.getAll('flexible_trip_dates[]'), // e.g., ["june", "july", "august"]
+       
+        // Alternative flexible parameters 
+        monthly_start_date: urlParams.get('monthly_start_date'),
+        monthly_end_date: urlParams.get('monthly_end_date'),
+        monthly_length: urlParams.get('monthly_length'),
+  
+        // Price range
+        price_min: urlParams.get('price_min') || '',
+        price_max: urlParams.get('price_max') || '',
+    };
     
+    return searchParams;
+}
+
 setTimeout(() => {
     // Select all listing cards on the Airbnb search results page 
     // Using Airbnb's data-testid attribute
