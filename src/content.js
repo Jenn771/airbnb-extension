@@ -1,11 +1,17 @@
 console.log("Airbnb Extension is running");
 
+let userNights = 0;
+let searchParams = {};
+
 // Listen for incoming messages sent from popup.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "SET_NIGHTS") {
-        // Extract the number of nights from the message
-        const nights = message.nights;
-        console.log(`Received number of nights from popup: ${nights}`);
+        userNights = message.nights;
+        console.log(`Received number of nights from popup: ${userNights}`);
+
+        // Get current search parameters
+        searchParams = getAirbnbSearchParams();
+        console.log('Search parameters:', searchParams);
     }
 });
 
@@ -27,7 +33,7 @@ function getAirbnbSearchParams() {
         date_picker_type: urlParams.get('date_picker_type'),
 
         // DATE PARAMETERS
-        flexible_trip_lengths: urlParams.get('flexible_trip_lengths'), // e.g., "one_week" or "weekend_trip" or "one_month"
+        flexible_trip_lengths: urlParams.getAll('flexible_trip_lengths[]'), // e.g., "one_week" or "weekend_trip" or "one_month"
         flexible_trip_dates: urlParams.getAll('flexible_trip_dates[]'), // e.g., ["june", "july", "august"]
        
         // Alternative flexible parameters 
