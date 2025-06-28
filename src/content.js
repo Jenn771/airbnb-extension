@@ -3,6 +3,7 @@ console.log("Airbnb Extension is running");
 let desiredNights = 0;
 let searchParams = {};
 let allListings = [];
+let listingResults = {}; // Store calculated results by listing index
 
 // Listen for incoming messages sent from popup.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -14,6 +15,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         searchParams = getAirbnbSearchParams();
         console.log('Search parameters:', searchParams);
 
+        // Clear previous results when the number of nights changes
+        listingResults = {};
+
+        // TODO: Re-run processAllListings() when new listings are loaded or page is changed
         // Start processing each listing
         processAllListings();
     }
@@ -65,6 +70,9 @@ async function processAllListings() {
         // Store listing data for later use
         allListings.push(listingData);
 
+        // Add button to this listing
+        addFindBestDatesButton(listingData);
+
         if (listingData.link !== "No link") {
             console.log(`Processing listing ${i + 1}: ${listingData.title}`);
 
@@ -86,3 +94,82 @@ function extractListingBasicInfo (listing, index) {
     return { title, link, index, element: listing };
 }
 
+
+// Add "Find Best Dates" button to a listing
+function addFindBestDatesButton (listingData) {
+    const listingElement = listingData.element;
+    const listingIndex = listingData.index;
+
+    // Check if button already exists 
+    const existingButton = listingElement.querySelector('.find-best-dates-btn');
+    if (existingButton) {
+        // Update existing button text in case nights changed
+        updateButtonText(existingButton, listingIndex);
+        return;
+    }
+
+    const buttonContainer = document.createElement("div");
+    buttonContainer.style.cssText = `
+        position: relative; 
+        z-index: 9999; 
+        pointer-events: auto;
+        margin-top: 8px;
+    `;
+
+    // Create the button element
+    const button = document.createElement("button");
+    button.className = 'find-best-dates-btn';
+    button.style.cssText = `
+        background-color: #FF5A5F;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    `;
+
+    // Set initial button text
+    updateButtonText(button, listingIndex);
+
+    const handleClick = (event) => {
+        event.stopPropagation(); // Prevent event bubbling
+        event.preventDefault(); // Prevent navigating to listing
+        event.stopImmediatePropagation();
+
+        console.log(`Button clicked for : ${listingData.title}`);
+        console.log(`User wants ${desiredNights} nights`);
+        alert(`TODO: Find best dates for ${listingData.title}`);
+    };
+
+    button.addEventListener("click", handleClick, true);   // capturing phase listener
+    button.addEventListener("mousedown", handleClick, true);  // capturing phase listener
+    button.addEventListener("click", handleClick, false);  // bubbling phase listener
+
+    // Container protection
+    buttonContainer.addEventListener("click", (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+    }, true);
+
+    buttonContainer.appendChild(button);
+    listingElement.appendChild(buttonContainer);
+}
+
+// Update button text based on current state
+function updateButtonText(button, listingIndex) {
+    const result = listingResults[listingIndex];
+
+    if(result) {
+        // Show the calcualte result
+        button.innerText = "TODO: show best price and date range";
+        button.style.backgroundColor = '#00A699';
+        button.disabled = true; 
+    } else {
+        // Show default text
+        button.innerText = `Find Best ${desiredNights}-Night Dates`;
+        button.style.backgroundColor = '#FF5A5F';
+        button.disabled = false;
+    }
+}
