@@ -8,6 +8,10 @@ let listingResults = {}; // Store calculated results by listing index
 // Listen for incoming messages sent from popup.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "SET_NIGHTS") {
+        if (desiredNights === message.nights) {
+            return;
+        }
+        
         desiredNights = message.nights;
         console.log(`Received number of nights from popup: ${desiredNights}`);
 
