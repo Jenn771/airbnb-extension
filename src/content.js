@@ -4,6 +4,8 @@ let desiredNights = 0;
 let searchParams = {};
 let allListings = [];
 let listingResults = {}; // Store calculated results by listing index
+let observer = null;
+let debounceTimer = null;
 
 // Listen for incoming messages sent from popup.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -22,11 +24,69 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         // Clear previous results when the number of nights changes
         listingResults = {};
 
-        // TODO: Re-run processAllListings() when new listings are loaded or page is changed
-        // Start processing each listing
-        processAllListings();
+        // Initialize everything
+        initializeExtension();
+        
     }
 });
+
+function initializeExtension() {
+    // Start processing each listing and set up observer
+    processAllListings();
+
+    setMutationObserver();
+}
+
+function setMutationObserver() {
+    if (observer) {
+        observer.disconnect();
+    }
+
+    // Create new observer
+    observer = new MutationObserver((mutations) => {
+        let shouldReprocess = false;
+
+        // Check if new listing cards were added
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList') {
+                mutation.addedNodes.forEach((node) => {
+                    // Check if the added node is an element (not text)
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        if (node.matches && node.matches('[data-testid="card-container"]')) {
+                            // Individual listing card was added directly
+                            shouldReprocess = true;
+                        } else if (node.querySelector && node.querySelector('[data-testid="card-container"]')){
+                            // Container containing one or more listing cards was added
+                            shouldReprocess = true;
+                        }
+                    }
+                });
+            }
+        });
+
+        // Reprocess only if detected changes
+        if (shouldReprocess && desiredNights > 0) {
+            clearTimeout(debounceTimer);
+
+            debounceTimer = setTimeout(() => {
+                listingResults = {};
+                processAllListings();
+            }, 500);
+        }
+    });
+
+
+    // Changes to look for
+    const configOptions = {
+        childList: true,    // Watch for added/removed elements
+        subtree: true,      // Watch the entire subtree
+    };
+
+    const targetNode = document.body;
+    observer.observe(targetNode, configOptions);
+
+    console.log('MutationObserver set up to watch for listing changes');
+}
 
 // Function to extract search parameters from current Airbnb URL
 function getAirbnbSearchParams() {
@@ -177,3 +237,10 @@ function updateButtonText(button, listingIndex) {
         button.disabled = false;
     }
 }
+
+// Clean up observer
+window.addEventListener('beforeunload', () => {
+    if (observer) {
+        observer.disconnect();
+    }
+});
