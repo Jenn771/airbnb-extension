@@ -69,6 +69,9 @@ function setMutationObserver() {
             clearTimeout(debounceTimer);
 
             debounceTimer = setTimeout(() => {
+                searchParams = getAirbnbSearchParams();
+                console.log("Updated searchParams after DOM change:", searchParams);
+
                 listingResults = {};
                 processAllListings();
             }, 500);
@@ -198,8 +201,8 @@ function addFindBestDatesButton (listingData) {
     updateButtonText(button, listingIndex);
 
     const handleClick = (event) => {
-        event.stopPropagation(); // Prevent event bubbling
-        event.preventDefault(); // Prevent navigating to listing
+        event.stopPropagation();
+        event.preventDefault();
         event.stopImmediatePropagation();
 
         console.log(`Button clicked for : ${listingData.title}`);
