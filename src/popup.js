@@ -31,6 +31,29 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initial button state
     updateButtonState();
+
+
+    // Collapsible setup section
+    const setupHeader = document.getElementById('setupHeader');
+    const setupContent = document.getElementById('setupContent');
+    const toggleArrow = document.getElementById('toggleArrow');
+
+    // Load saved collapse state
+    chrome.storage.local.get(['setupCollapsed'], (result) => {
+        if (result.setupCollapsed) {
+            setupContent.classList.add('collapsed');
+            toggleArrow.classList.add('collapsed');
+        }
+    });
+
+    setupHeader.addEventListener('click', () => {
+        const isCollapsed = setupContent.classList.toggle('collapsed');
+        toggleArrow.classList.toggle('collapsed');
+
+        // Save collapse state
+        chrome.storage.local.set({ setupCollapsed: isCollapsed});
+    });
+
 });
 
 // Wait for the user to click the "Submit" button
