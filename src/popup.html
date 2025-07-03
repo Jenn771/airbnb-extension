@@ -4,7 +4,7 @@
     <title>Stay Length</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: BlinkMacSystemFont, Arial, sans-serif;
             width: 300px;
             padding: 16px;
             margin: 0;
@@ -24,23 +24,107 @@
             font-size: 11px;
             color: #717171;
         }
+        
+        .setup-section {
+            background: #fafafa;
+            border: 1px solid #e6e6e6;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: 0 0px 2.5px #0000000a;
+        }
+        .setup-header {
+            padding: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .setup-header:hover {
+            background: #f5f5f5;
+        }
+        .setup-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: #484848;
+        }
+        .toggle-arrow::before {
+            content: '\2212';
+            font-weight: bold;
+            font-size: 13px;
+            color: #717171;
+            transition: transform 0.2s;
+        }
+        .toggle-arrow.collapsed::before {
+            content: '\002B';
+        }
+
+        .setup-content {
+            padding: 0 12px 12px 12px;
+            transition: max-height 0.3s ease-out;
+            overflow: hidden;
+        }
+        .setup-content.collapsed {
+            max-height: 0;
+            padding: 0 12px;
+        }
+        .setup-intro {
+            background: #e8f5e8;
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-bottom: 12px;
+            font-size: 11px;
+            color: #2e7d32;
+            border: 1px solid #cce5cc;
+            line-height: 1.4;
+        }
+        .step-section {
+            margin-bottom: 10px;
+        }
+        .step-header {
+            font-weight: 600;
+            font-size: 11px;
+            color: #FF5A5F;
+            margin-bottom: 4px;
+        }
+        .step {
+            margin-bottom: 4px;
+            font-size: 12px;
+            color: #484848;
+        }
+        .setup-note {
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-top: 8px;
+            font-size: 10px;
+            color: #8a6d3b;
+            line-height: 1.4;
+        }
         input {
             width: 100%;
-            padding: 8px 10px; 
-            border: 2px solid #DDDDDD;
+            padding: 10px; 
+            border: 1px solid #DDDDDD;
             border-radius: 6px;
             font-size: 14px;
             box-sizing: border-box; 
+            transition: border 0.2s;
         }
         .input-section {
             margin-bottom: 16px;
         }
         .input-label {
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 600;
             color: #484848;
             margin-bottom: 6px;
             display: block;
+        }
+        input:focus {
+            outline: none;
+            border-color: #FF5A5F;
         }
         button {
             width: 100%;
@@ -69,6 +153,35 @@
         <div class="subtitle">Find cheapest flexible dates</div>
     </div>
 
+    <!-- Setup Instructions -->
+    <div class="setup-section">
+        <div class="setup-header" id="setupHeader">
+            <span class="setup-title">Setup Instructions</span>
+            <span class="toggle-arrow" id="toggleArrow"></span>
+        </div>
+        <div class="setup-content" id="setupContent">
+            <div class="setup-intro">
+                <strong>Perfect for flexible travelers:</strong> Don't know eact dates but know how many nights you want? This finds the cheapest dates for you!
+            </div>
+            <div class="setup-steps">
+                <div class="step-section">
+                    <div class="step-header">Setup Airbnb first:</div>
+                    <div class="step">1. In Airbnb's date picker, click "<strong>Flexible</strong>"</div>
+                    <div class="step">2. Select "<strong>Weekend</strong>" or "<strong>Week</strong>" (not "month")</div>
+                    <div class="step">3. Optionally, choose which months you're open to</div>
+                    <div class="step">4. Click "Search" to view listings</div>
+                </div>
+                <div class="step-section">
+                    <div class="step-header">Use this extension:</div>
+                    <div class="step">5. Enter how many nights you want to stay</div>
+                    <div class="step">6. Click "<strong>Find Best Dates</strong>" to see cheapest options</div>
+                </div>
+            </div>
+            <div class="setup-note">
+                <strong>Important:</strong> This extension only works with Airbnb's "Flexible" date searches, not exact dates
+            </div>
+        </div>
+    </div>
 
 
     <!-- Input section -->
