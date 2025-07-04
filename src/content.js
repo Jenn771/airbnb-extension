@@ -179,7 +179,7 @@ function addFindBestDatesButton (listingData) {
     const buttonContainer = document.createElement("div");
     buttonContainer.style.cssText = `
         position: relative; 
-        z-index: 9999; 
+        z-index: 1; 
         pointer-events: auto;
         margin-top: 8px;
     `;
@@ -196,6 +196,8 @@ function addFindBestDatesButton (listingData) {
         font-size: 12px;
         cursor: pointer;
         transition: background-color 0.2s;
+        position: relative;
+        z-index: 1;
     `;
 
     // Set initial button text
