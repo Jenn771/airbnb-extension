@@ -126,8 +126,8 @@ async function processAllListings() {
     const listings = document.querySelectorAll('[data-testid="card-container"]');
     console.log(`Found ${listings.length} listings to process`);
 
-    // Reset listings array in case user runs again
-    allListings = []; 
+    // Update listings array in case user runs again
+    const currentListings = [];
 
     // Loop through each listing and extract basic info
     for (let i = 0; i < listings.length; i++) {
@@ -135,7 +135,7 @@ async function processAllListings() {
         const listingData = extractListingBasicInfo(listing, i);
 
         // Store listing data for later use
-        allListings.push(listingData);
+        currentListings.push(listingData);
 
         // Add button to this listing
         addFindBestDatesButton(listingData);
@@ -146,6 +146,7 @@ async function processAllListings() {
         }
 
     }
+    allListings = currentListings;
 }
 
 // Extract basic information from a single listing card
