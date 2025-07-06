@@ -3,7 +3,7 @@ console.log("Airbnb Extension is running");
 let desiredNights = 0;
 let searchParams = {};
 let allListings = [];
-let listingResults = {}; // Store calculated results by listing index
+let listingResults = new Map(); // Store calculated results by listing index
 let observer = null;
 let debounceTimer = null;
 
@@ -22,7 +22,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.log('Search parameters:', searchParams);
 
         // Clear previous results when the number of nights changes
-        listingResults = {};
+        listingResults.clear();
 
         // Initialize everything
         initializeExtension();
@@ -72,7 +72,7 @@ function setMutationObserver() {
                 searchParams = getAirbnbSearchParams();
                 console.log("Updated searchParams after DOM change:", searchParams);
 
-                listingResults = {};
+                listingResults.clear();
                 processAllListings();
             }, 500);
         }
@@ -229,7 +229,7 @@ function addFindBestDatesButton (listingData) {
 
 // Update button text based on current state
 function updateButtonText(button, listingIndex) {
-    const result = listingResults[listingIndex];
+    const result = listingResults.get(listingIndex);
 
     if(result) {
         // Show the calcualte result
