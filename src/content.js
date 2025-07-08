@@ -7,6 +7,12 @@ let listingResults = new Map(); // Store calculated results by listing index
 let observer = null;
 let debounceTimer = null;
 
+const DOM_SELECTORS = {
+    CARD_CONTAINER: '[data-testid="card-container"]',
+    LISTING_TITLE: '[data-testid="listing-card-title"]',
+    BUTTON_CLASS: '.find-best-dates-btn'
+};
+
 // Listen for incoming messages sent from popup.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "SET_NIGHTS") {
@@ -33,10 +39,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 function initializeExtension() {
     // Start processing each listing and set up observer
     processAllListings();
-
     setMutationObserver();
 }
 
+//--
 function setMutationObserver() {
     if (observer) {
         observer.disconnect();
@@ -47,33 +53,27 @@ function setMutationObserver() {
         let shouldReprocess = false;
 
         // Check if new listing cards were added
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'childList') {
-                mutation.addedNodes.forEach((node) => {
-                    // Check if the added node is an element (not text)
+        for (const mutation of mutations) {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                // Check if any added nodes contain lisiting cards
+                for (const node of mutations.addedNodes) {
                     if (node.nodeType === Node.ELEMENT_NODE) {
-                        if (node.matches && node.matches('[data-testid="card-container"]')) {
-                            // Individual listing card was added directly
+                        if (node.matches?.(DOM_SELECTORS.CARD_CONTAINER) || node.querySelector?.(DOM_SELECTORS.CARD_CONTAINER)) {
                             shouldReprocess = true;
-                        } else if (node.querySelector && node.querySelector('[data-testid="card-container"]')){
-                            // Container containing one or more listing cards was added
-                            shouldReprocess = true;
+                            break;
                         }
                     }
-                });
+                }
+                if (shouldReprocess) break;
             }
-        });
+        }
 
         // Reprocess only if detected changes
         if (shouldReprocess && desiredNights > 0) {
             clearTimeout(debounceTimer);
 
             debounceTimer = setTimeout(() => {
-                searchParams = getAirbnbSearchParams();
-                console.log("Updated searchParams after DOM change:", searchParams);
-
-                listingResults.clear();
-                processAllListings();
+                handlePageChange();
             }, 500);
         }
     });
@@ -89,6 +89,16 @@ function setMutationObserver() {
     observer.observe(targetNode, configOptions);
 
     console.log('MutationObserver set up to watch for listing changes');
+}
+
+function handlePageChange() {
+    searchParams = getAirbnbSearchParams();
+    console.log("Updated searchParams after DOM change:", searchParams);
+
+    // Clear results
+    listingResults.clear();
+    
+    processAllListings();
 }
 
 // Function to extract search parameters from current Airbnb URL
@@ -114,6 +124,7 @@ function getAirbnbSearchParams() {
     return searchParams;
 }
 
+//--
 // Loop through all the listings on the current page and call other functions
 async function processAllListings() {
     // Only proceed if user has set desired nights
