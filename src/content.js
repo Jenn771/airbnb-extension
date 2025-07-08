@@ -42,7 +42,6 @@ function initializeExtension() {
     setMutationObserver();
 }
 
-//--
 function setMutationObserver() {
     if (observer) {
         observer.disconnect();
@@ -56,7 +55,7 @@ function setMutationObserver() {
         for (const mutation of mutations) {
             if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                 // Check if any added nodes contain lisiting cards
-                for (const node of mutations.addedNodes) {
+                for (const node of mutation.addedNodes) {
                     if (node.nodeType === Node.ELEMENT_NODE) {
                         if (node.matches?.(DOM_SELECTORS.CARD_CONTAINER) || node.querySelector?.(DOM_SELECTORS.CARD_CONTAINER)) {
                             shouldReprocess = true;
@@ -124,7 +123,6 @@ function getAirbnbSearchParams() {
     return searchParams;
 }
 
-//--
 // Loop through all the listings on the current page and call other functions
 async function processAllListings() {
     // Only proceed if user has set desired nights
@@ -134,17 +132,16 @@ async function processAllListings() {
     }
 
     // Select all listing cards on the Airbnb search results page 
-    const listings = document.querySelectorAll('[data-testid="card-container"]');
+    const listings = document.querySelectorAll(DOM_SELECTORS.CARD_CONTAINER);
     console.log(`Found ${listings.length} listings to process`);
 
     // Update listings array in case user runs again
     const currentListings = [];
 
     // Loop through each listing and extract basic info
-    for (let i = 0; i < listings.length; i++) {
-        const listing = listings[i];
-        const listingData = extractListingBasicInfo(listing, i);
-
+    for (const [index, listing] of listings.entries()) {
+        const listingData = extractListingBasicInfo(listing, index);
+        
         // Store listing data for later use
         currentListings.push(listingData);
 
@@ -152,18 +149,18 @@ async function processAllListings() {
         addFindBestDatesButton(listingData);
 
         if (listingData.link !== "No link") {
-            console.log(`Processing listing ${i + 1}: ${listingData.title}`);
+            console.log(`Processing listing ${index + 1}: ${listingData.title}`);
 
         }
-
     }
+
     allListings = currentListings;
 }
 
 // Extract basic information from a single listing card
 function extractListingBasicInfo (listing, index) {
     // Get listing title
-    const titleElement = listing.querySelector('[data-testid="listing-card-title"]');
+    const titleElement = listing.querySelector(DOM_SELECTORS.LISTING_TITLE);
     const title = titleElement ? titleElement.innerText : "No title";
 
     // Extract the link to the full listing page
