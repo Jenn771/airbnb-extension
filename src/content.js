@@ -177,13 +177,22 @@ function addFindBestDatesButton (listingData) {
     const listingIndex = listingData.index;
 
     // Check if button already exists 
-    const existingButton = listingElement.querySelector('.find-best-dates-btn');
+    const existingButton = listingElement.querySelector(DOM_SELECTORS.BUTTON_CLASS);
     if (existingButton) {
         // Update existing button text in case nights changed
         updateButtonText(existingButton, listingIndex);
         return;
     }
 
+    const buttonContainer = createButtonContainer();
+    const button = createButton(listingData, listingIndex)
+
+
+    buttonContainer.appendChild(button);
+    listingElement.appendChild(buttonContainer);
+}
+
+function createButtonContainer() {
     const buttonContainer = document.createElement("div");
     buttonContainer.style.cssText = `
         position: relative; 
@@ -192,7 +201,17 @@ function addFindBestDatesButton (listingData) {
         margin-top: 8px;
     `;
 
-    // Create the button element
+    // Container protection
+    buttonContainer.addEventListener("click", (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+    }, true);
+
+    return buttonContainer;
+}
+
+// Create buttom element
+function createButton(listingData, listingIndex) {
     const button = document.createElement("button");
     button.className = 'find-best-dates-btn';
     button.style.cssText = `
@@ -225,14 +244,7 @@ function addFindBestDatesButton (listingData) {
     button.addEventListener("mousedown", handleClick, true);  // capturing phase listener
     button.addEventListener("click", handleClick, false);  // bubbling phase listener
 
-    // Container protection
-    buttonContainer.addEventListener("click", (event) => {
-        event.stopPropagation();
-        event.preventDefault();
-    }, true);
-
-    buttonContainer.appendChild(button);
-    listingElement.appendChild(buttonContainer);
+    return button;
 }
 
 // Update button text based on current state
@@ -256,5 +268,8 @@ function updateButtonText(button, listingIndex) {
 window.addEventListener('beforeunload', () => {
     if (observer) {
         observer.disconnect();
+    }
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
     }
 });
