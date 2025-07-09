@@ -176,7 +176,7 @@ body {
 input {
     width: 100%;
     padding: 12px;
-    border: 1px solid #DDDDDD;
+    border: 2px solid #DDDDDD;
     border-radius: 8px;
     font-size: 15px;
     box-sizing: border-box;
@@ -211,7 +211,7 @@ input::placeholder {
 /* Button */
 button {
     width: 100%;
-    background: linear-gradient(135deg, #FF385C, #E31C5F);
+    background: #FF385C;
     color: white;
     border: none;
     border-radius: 8px;
@@ -220,14 +220,12 @@ button {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px #ff385c33;
     position: relative;
     overflow: hidden;
 }
 
 button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px #ff385c4d;
+    background: #bb344d;
 }
 
 button:disabled {
