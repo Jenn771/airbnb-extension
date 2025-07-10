@@ -11,15 +11,15 @@
     </div>
 
     <!-- Setup Instructions -->
-    <div class="setup-section">
-        <div class="setup-header" id="setupHeader">
-            <div class="setup-title">
-                <div class="info-icon">i</div>
+    <div class="collapsible-section">
+        <div class="collapsible-header" id="setupHeader">
+            <div class="collapsible-title">
+                <div class="icon">i</div>
                 Setup Instructions
             </div>
             <div class="toggle-arrow" id="toggleArrow"></div>
         </div>
-        <div class="setup-content" id="setupContent">
+        <div class="collapsible-content" id="setupContent">
             <div class="setup-intro">
                 <strong>Perfect for flexible travelers:</strong> Don't know exact dates but know how many nights you want? This finds the cheapest dates for you!
             </div>
@@ -40,6 +40,7 @@
                         Use this extension:
                     </div>
                     <div class="step">Enter how many nights you want to stay</div>
+                    <div class="step">Choose your flexibility preference</div>
                     <div class="step">Click "<strong>Find Best Dates</strong>" to see cheapest options</div>
                 </div>
             </div>
@@ -49,6 +50,33 @@
         </div>
     </div>
 
+    <!-- Flexibility Options -->
+    <div class="collapsible-section">
+        <div class="collapsible-header" id="flexibilityHeader">
+            <div class="collapsible-title">
+                Flexibility Settings
+            </div>
+            <div class="toggle-arrow" id="flexibilityToggleArrow"></div>
+        </div>
+        <div class="collapsible-content" id="flexibilityContent">
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="flexibility" value="respect" id="respectFilters" checked>
+                    <div class="radio-content">
+                        <div class="radio-title">Respect Airbnb filters</div>
+                        <div class="radio-description">Only search within your chosen constraints</div>
+                    </div>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="flexibility" value="ignore" id="ignoreFilters">
+                    <div class="radio-content">
+                        <div class="radio-title">Ignore trip length, keep months</div>
+                        <div class="radio-description">Search any day pattern in selected months</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+    </div>
 
     <!-- Input section -->
     <div class="input-section">
