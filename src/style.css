@@ -1,6 +1,6 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    width: 320px;
+    width: 300px;
     padding: 12px;
     margin: 0;
     background: #fff;
@@ -12,39 +12,38 @@ body {
     text-align: center;
     margin-bottom: 14px;
     padding-bottom: 12px;
-    border-bottom: 1px solid #F0F0F0;
+    border-bottom: 2px solid #f5f5f5;
 }
 
 .logo {
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 19px;
+    font-weight: 700;
     color: #FF385C;
-    margin-bottom: 4px;
-    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
 }
 
 .subtitle {
     font-size: 13px;
-    color: #6A6A6A;
-    font-weight: 400;
+    color: #717171;
+    font-weight: 500;
 }
 
-
-/* Setup Instructions Section */
-.setup-section {
+/* Collapsible section */
+.collapsible-section {
     background: #FAFAFA;
     border: 1px solid #DDDDDD;
-    border-radius: 8px;
+    border-radius: 12px;
     margin-bottom: 14px;
     overflow: hidden;
 }
 
-.setup-section:hover {
+.collapsible-section:hover {
     box-shadow: 0 2px 4px #00000014;
 }
 
-.setup-header {
-    padding: 12px 14px;
+.collapsible-header {
+    padding: 16px 18px;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
@@ -52,20 +51,20 @@ body {
     user-select: none;
 }
 
-.setup-header:hover {
+.collapsible-header:hover {
     background: #F0F0F0;
 }
 
-.setup-title {
+.collapsible-title {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 15px;
     color: #222222;
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-.info-icon {
+.icon {
     width: 18px;
     height: 18px;
     background: #FF385C;
@@ -91,17 +90,18 @@ body {
     content: '\002B';
 }
 
-.setup-content {
+.collapsible-content {
     padding: 0 14px 14px 14px;
     transition: max-height 0.3s ease-out;
     overflow: hidden;
 }
 
-.setup-content.collapsed {
+.collapsible-content.collapsed {
     max-height: 0;
     padding: 0 14px;
 }
 
+/* Setup Instructions Section */
 .setup-intro {
     background: #efefef;
     border-radius: 6px;
@@ -147,13 +147,13 @@ body {
 .step {
     margin-bottom: 6px;
     font-size: 12px;
-    color: #717171;
+    color: #666;
     padding-left: 24px;
     line-height: 1.4;
 }
 
 .step strong {
-    color: #484848;
+    color: #333;
     font-weight: 600;
 }
 
@@ -172,13 +172,70 @@ body {
     color: #484848;
 }
 
+/* Radio Group Styles */
+.radio-group {
+    display: flex;
+    padding-top: 5px;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: 1px solid #e8e8e8;
+    background: white;
+}
+
+.radio-option:hover {
+    background: #f8f9fa;
+    border-color: #FF385C;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.radio-option input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: #FF385C;
+    cursor: pointer;
+}
+
+.radio-option input[type="radio"]:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.radio-content {
+    flex: 1;
+}
+
+.radio-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #222222;
+    margin-bottom: 4px;
+}
+
+.radio-description {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
+}
+
 /* Input Section */
 input {
     width: 100%;
-    padding: 12px;
+    padding: 14px 16px;
     border: 2px solid #DDDDDD;
-    border-radius: 8px;
-    font-size: 15px;
+    border-radius: 10px;
+    font-size: 16px;
     box-sizing: border-box;
     transition: all 0.2s ease;
     background: #fff;
@@ -190,10 +247,10 @@ input {
 }
 
 .input-label {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
-    color: #484848;
-    margin-bottom: 5px;
+    color: #333;
+    margin-bottom: 8px;
     display: block;
 }
 
@@ -214,8 +271,8 @@ button {
     background: #FF385C;
     color: white;
     border: none;
-    border-radius: 8px;
-    padding: 12px;
+    border-radius: 10px;
+    padding: 16px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;

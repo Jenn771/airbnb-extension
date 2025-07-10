@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Best Dates Finder</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            width: 280px;
+            padding: 16px;
+            margin: 0;
+            background: #fff;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        
+        .title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #FF5A5F;
+            margin-bottom: 4px;
+        }
+        
+        .subtitle {
+            font-size: 11px;
+            color: #717171;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 12px;
+            font-size: 11px;
+            color: #856404;
+        }
+        
+        .warning-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .input-section {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            color: #484848;
+            margin-bottom: 6px;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 8px 10px;
+            border: 2px solid #DDDDDD;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #FF5A5F;
+        }
+        
+        .help-text {
+            font-size: 10px;
+            color: #717171;
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #FF5A5F;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover:not(:disabled) {
+            background-color: #E04A4F;
+        }
+        
+        button:disabled {
+            background-color: #DDDDDD;
+            cursor: not-allowed;
+        }
+        
+        .setup-info {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 12px;
+            font-size: 11px;
+        }
+        
+        .setup-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: #495057;
+        }
+        
+        .setup-step {
+            margin-bottom: 2px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">🏠 Best Dates Finder</div>
+        <div class="subtitle">Find cheapest flexible dates</div>
+    </div>
+
+    <div class="setup-info">
+        <div class="setup-title">⚠️ Requirements:</div>
+        <div class="setup-step">1. Click "Flexible" in Airbnb date picker</div>
+        <div class="setup-step">2. Choose "Weekend" or "Week" (not Month)</div>
+        <div class="setup-step">3. Click "Search" to see listings</div>
+    </div>
+    
+    <div class="warning" id="flexibleWarning" style="display: none;">
+        <div class="warning-title">Note:</div>
+        This extension works best with Airbnb's "Flexible" search. If you haven't set up flexible dates, the extension will search for any available dates with your desired length.
+    </div>
+
+    <div class="input-section">
+        <label for="nightsInput">Number of Nights:</label>
+        <input type="number" id="nightsInput" min="1" max="30" placeholder="e.g., 3" />
+        <div class="help-text">
+            Enter how many nights you want to stay. The extension will find the cheapest dates for this length.
+        </div>
+    </div>
+
+    <button id="submitBtn">Find Best Dates</button>
+
+    <script>
+        // Check if we're on Airbnb and show appropriate warnings
+        document.addEventListener('DOMContentLoaded', function() {
+            chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+                if (!tabs[0].url.includes('airbnb.com')) {
+                    document.getElementById('submitBtn').textContent = 'Navigate to Airbnb first';
+                    document.getElementById('submitBtn').disabled = true;
+                    return;
+                }
+                
+                // Show the flexible search warning
+                document.getElementById('flexibleWarning').style.display = 'block';
+            });
+        });
+
+        // Wait for the user to click the "Submit" button
+        document.getElementById('submitBtn').addEventListener('click', () => {
+            // Get the value from the input field with ID 'nightsInput'
+            const nights = parseInt(document.getElementById('nightsInput').value, 10);
+
+            if (!isNaN(nights) && nights > 0) {
+                // Send number of nights to content.js
+                chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                    chrome.tabs.sendMessage(tabs[0].id, { type: "SET_NIGHTS", nights }, function(response) {
+                        if (chrome.runtime.lastError) {
+                            alert('Please refresh the Airbnb page and try again.');
+                        } else {
+                            console.log(`Sent nights: ${nights}`);
+                            // Close popup after successful message
+                            window.close();
+                        }
+                    });
+                });
+            } else {
+                alert('Please enter a valid number of nights.');
+            }
+        });
+
+        // Enable enter key submission
+        document.getElementById('nightsInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                document.getElementById('submitBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>
