@@ -11,66 +11,62 @@ function updateButtonState() {
     }
 }
 
-// Load the previous saved number of nights when popup opens
+// Load the previous saved values when popup opens
 document.addEventListener('DOMContentLoaded', () => {
     const nightsInput = document.getElementById('nightsInput');
     const submitBtn = document.getElementById('submitBtn');
-
-    // Load saved value
-    chrome.storage.local.get(['savedNights'], (result) => {
+    const respectFilters = document.getElementById('respectFilters');
+    const ignoreFilters = document.getElementById('ignoreFilters');
+    
+    // Load saved values
+    chrome.storage.local.get(['savedNights', 'savedFlexibility'], (result) => {
         if (result.savedNights) {
             nightsInput.value = result.savedNights;
         }
-
+        
+        // Load saved flexibility option (default to 'respect')
+        const flexibilityOption = result.savedFlexibility || 'respect';
+        if (flexibilityOption === 'respect') {
+            respectFilters.checked = true;
+        } else {
+            ignoreFilters.checked = true;
+        }
+        
         // Update the button state after loading the saved value
         updateButtonState();
     });
-
+    
     // Listen for input changes to update the button state
     nightsInput.addEventListener('input', updateButtonState);
     
     // Initial button state
     updateButtonState();
-
-
-    // Collapsible setup section
-    const setupHeader = document.getElementById('setupHeader');
-    const setupContent = document.getElementById('setupContent');
-    const toggleArrow = document.getElementById('toggleArrow');
-
-    // Load saved collapse state
-    chrome.storage.local.get(['setupCollapsed'], (result) => {
-        if (result.setupCollapsed) {
-            setupContent.classList.add('collapsed');
-            toggleArrow.classList.add('collapsed');
-        }
-    });
-
-    setupHeader.addEventListener('click', () => {
-        const isCollapsed = setupContent.classList.toggle('collapsed');
-        toggleArrow.classList.toggle('collapsed');
-
-        // Save collapse state
-        chrome.storage.local.set({ setupCollapsed: isCollapsed});
-    });
-
 });
 
 // Wait for the user to click the "Submit" button
 document.getElementById('submitBtn').addEventListener('click', () => {
     // Get the value from the input field with ID 'nightsInput'
     const nights = parseInt(document.getElementById('nightsInput').value, 10);
+    
+    // Get the selected flexibility option
+    const flexibilityOption = document.querySelector('input[name="flexibility"]:checked').value;
 
     if (!isNaN(nights) && nights > 0) {
-        // Save the number of nights to use in the future
-        chrome.storage.local.set({ savedNights: nights });
-
-        // Send number of nights to content.js
-        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, { type: "SET_NIGHTS", nights });
+        // Save the number of nights and flexibility option to use in the future
+        chrome.storage.local.set({ 
+            savedNights: nights,
+            savedFlexibility: flexibilityOption
         });
-
-        console.log(`Sent nights: ${nights}`);
+        
+        // Send number of nights and flexibility option to content.js
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, { 
+                type: "SET_NIGHTS", 
+                nights: nights,
+                flexibility: flexibilityOption
+            });
+        });
+        
         //window.close();
     } else {
         alert('Please enter a valid number of nights.');
