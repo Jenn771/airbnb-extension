@@ -6,6 +6,7 @@ let allListings = [];
 let listingResults = new Map(); // Store calculated results by listing index
 let observer = null;
 let debounceTimer = null;
+let flexibilityMode = 'respect';
 
 const DOM_SELECTORS = {
     CARD_CONTAINER: '[data-testid="card-container"]',
@@ -16,12 +17,14 @@ const DOM_SELECTORS = {
 // Listen for incoming messages sent from popup.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "SET_NIGHTS") {
-        if (desiredNights === message.nights) {
+        if (desiredNights === message.nights && flexibilityMode === message.flexibility) {
             return;
         }
         
         desiredNights = message.nights;
-        console.log(`Received number of nights from popup: ${desiredNights}`);
+        flexibilityMode = message.flexibility;
+        
+        console.log(`Received number of nights from popup: ${desiredNights}, flexibility: ${flexibilityMode}`);
 
         // Get current search parameters
         searchParams = getAirbnbSearchParams();
