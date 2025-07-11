@@ -11,72 +11,16 @@
     </div>
 
     <!-- Setup Instructions -->
-    <div class="collapsible-section">
-        <div class="collapsible-header" id="setupHeader">
-            <div class="collapsible-title">
-                <div class="icon">i</div>
-                Setup Instructions
-            </div>
-            <div class="toggle-arrow" id="toggleArrow"></div>
-        </div>
-        <div class="collapsible-content" id="setupContent">
-            <div class="setup-intro">
-                <strong>Perfect for flexible travelers:</strong> Don't know exact dates but know how many nights you want? This finds the cheapest dates for you!
-            </div>
-            <div class="setup-steps">
-                <div class="step-section">
-                    <div class="step-header">
-                        <div class="step-number">1</div>
-                        Setup Airbnb first:
-                    </div>
-                    <div class="step">In Airbnb's date picker, click "<strong>Flexible</strong>"</div>
-                    <div class="step">Select "<strong>Weekend</strong>" or "<strong>Week</strong>" (not "month")</div>
-                    <div class="step">Optionally, choose which months you're open to</div>
-                    <div class="step">Click "Search" to view listings</div>
-                </div>
-                <div class="step-section">
-                    <div class="step-header">
-                        <div class="step-number">2</div>
-                        Use this extension:
-                    </div>
-                    <div class="step">Enter how many nights you want to stay</div>
-                    <div class="step">Choose your flexibility preference</div>
-                    <div class="step">Click "<strong>Find Best Dates</strong>" to see cheapest options</div>
-                </div>
-            </div>
-            <div class="setup-note">
-                <strong>Important:</strong> This extension only works with Airbnb's "Flexible" date searches, not exact dates
-            </div>
-        </div>
+    <div class="setup-section" id="setupSection">
+        <div class="setup-title">Required Setup:</div>
+        <ol class="setup-steps">
+            <li class="step">Click "<strong>Flexible</strong>" in Airbnb date picker</li>
+            <li class="step">Choose "<strong>Weekend</strong>" or "<strong>Week</strong>" (not Month)</li>
+            <li class="step">Optionally select specific months</li>
+            <li class="step">Search listings, then return here to enter nights</li>
+        </ol>
     </div>
 
-    <!-- Flexibility Options -->
-    <div class="collapsible-section">
-        <div class="collapsible-header" id="flexibilityHeader">
-            <div class="collapsible-title">
-                Flexibility Settings
-            </div>
-            <div class="toggle-arrow" id="flexibilityToggleArrow"></div>
-        </div>
-        <div class="collapsible-content" id="flexibilityContent">
-            <div class="radio-group">
-                <label class="radio-option">
-                    <input type="radio" name="flexibility" value="respect" id="respectFilters" checked>
-                    <div class="radio-content">
-                        <div class="radio-title">Respect Airbnb filters</div>
-                        <div class="radio-description">Only search within your chosen constraints</div>
-                    </div>
-                </label>
-                <label class="radio-option">
-                    <input type="radio" name="flexibility" value="ignore" id="ignoreFilters">
-                    <div class="radio-content">
-                        <div class="radio-title">Ignore trip length, keep months</div>
-                        <div class="radio-description">Search any day pattern in selected months</div>
-                    </div>
-                </label>
-            </div>
-        </div>
-    </div>
 
     <!-- Input section -->
     <div class="input-section">
@@ -84,6 +28,26 @@
         <input type="number" id="nightsInput" min="1" max="30" placeholder="e.g., 3" />
     </div>
 
+    <!-- Flexibility Options -->
+    <div class="flexibility-section">
+        <label class="input-label">Flexibility Options:</label>
+        <div class="radio-group">
+            <label class="radio-option">
+                <input type="radio" name="flexibility" value="respect" id="respectFilters" checked>
+                <div class="radio-content">
+                    <div class="radio-title">Respect Airbnb filters</div>
+                    <div class="radio-description">Respects your "Week" (5 nights) or "Weekend" (2 nights) choice and ignores your nights input</div>
+                </div>
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="flexibility" value="ignore" id="ignoreFilters">
+                <div class="radio-content">
+                    <div class="radio-title">Ignore trip length</div>
+                    <div class="radio-description">Use your nights input + any months you selected in Airbnb</div>
+                </div>
+            </label>
+        </div>
+    </div>
 
     <button id="submitBtn">Find Best Dates</button>
 
