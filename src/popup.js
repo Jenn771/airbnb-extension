@@ -67,7 +67,7 @@ document.getElementById('submitBtn').addEventListener('click', () => {
             });
         });
         
-        //window.close();
+        window.close();
     } else {
         alert('Please enter a valid number of nights.');
     }
