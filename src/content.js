@@ -8,6 +8,7 @@ let observer = null;
 let debounceTimer = null;
 let flexibilityMode = 'respect';
 
+
 const DOM_SELECTORS = {
     CARD_CONTAINER: '[data-testid="card-container"]',
     LISTING_TITLE: '[data-testid="listing-card-title"]',
@@ -233,15 +234,17 @@ function createButton(listingData, listingIndex) {
     // Set initial button text
     updateButtonText(button, listingIndex);
 
-    const handleClick = (event) => {
-        event.stopPropagation();
-        event.preventDefault();
-        event.stopImmediatePropagation();
+const handleClick = (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    event.stopImmediatePropagation();
 
-        console.log(`Button clicked for : ${listingData.title}`);
-        console.log(`User wants ${desiredNights} nights`);
-        alert(`TODO: Find best dates for ${listingData.title}`);
-    };
+    console.log(`Button clicked for: ${listingData.title}`);
+    console.log(`User wants ${desiredNights} nights, flexibility: ${flexibilityMode}`);
+    
+    // Add to processing queue instead of alert
+    addToQueue(listingData);
+};
 
     button.addEventListener("click", handleClick, true);   // capturing phase listener
     button.addEventListener("mousedown", handleClick, true);  // capturing phase listener
