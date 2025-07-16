@@ -8,6 +8,10 @@ let observer = null;
 let debounceTimer = null;
 let flexibilityMode = 'respect';
 
+let processingQueue = [];
+let isProcessing = false;
+let maxConcurrent = 1;
+
 
 const DOM_SELECTORS = {
     CARD_CONTAINER: '[data-testid="card-container"]',
@@ -239,10 +243,11 @@ const handleClick = (event) => {
     event.preventDefault();
     event.stopImmediatePropagation();
 
-    console.log(`Button clicked for: ${listingData.title}`);
+    /* console.log(`Button clicked for: ${listingData.title}`);
     console.log(`User wants ${desiredNights} nights, flexibility: ${flexibilityMode}`);
-    
-    // Add to processing queue instead of alert
+     */
+
+    // Add listing to the processing queue 
     addToQueue(listingData);
 };
 
@@ -269,6 +274,26 @@ function updateButtonText(button, listingIndex) {
         button.disabled = false;
     }
 }
+
+function addToQueue(listingData) {
+    // Check if already in queue
+    const existingIndex = processingQueue.findIndex(item => item.index === listingData.index);
+    if (existingIndex !== -1) {
+        console.log(`Listing ${listingData.index} already in queue`);
+        return;
+    }
+
+    // Add to queue
+    processingQueue.push({
+        ...listingData,
+        status: 'pending',
+        addedAt: Date.now()
+    });
+
+    console.log(`Added listing ${listingData.index} to queue. Queue length: ${processingQueue.length}`);
+
+}
+
 
 // Clean up observer
 window.addEventListener('beforeunload', () => {
