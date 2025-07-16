@@ -238,18 +238,18 @@ function createButton(listingData, listingIndex) {
     // Set initial button text
     updateButtonText(button, listingIndex);
 
-const handleClick = (event) => {
-    event.stopPropagation();
-    event.preventDefault();
-    event.stopImmediatePropagation();
+    const handleClick = (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+        event.stopImmediatePropagation();
 
-    /* console.log(`Button clicked for: ${listingData.title}`);
-    console.log(`User wants ${desiredNights} nights, flexibility: ${flexibilityMode}`);
-     */
+        /* console.log(`Button clicked for: ${listingData.title}`);
+        console.log(`User wants ${desiredNights} nights, flexibility: ${flexibilityMode}`);
+        */
 
-    // Add listing to the processing queue 
-    addToQueue(listingData);
-};
+        // Add listing to the processing queue 
+        addToQueue(listingData);
+    };
 
     button.addEventListener("click", handleClick, true);   // capturing phase listener
     button.addEventListener("mousedown", handleClick, true);  // capturing phase listener
@@ -292,8 +292,66 @@ function addToQueue(listingData) {
 
     console.log(`Added listing ${listingData.index} to queue. Queue length: ${processingQueue.length}`);
 
+    // Start processing
+    if (!isProcessing) {
+        processQueue();
+    }
 }
 
+// Main queue processor
+async function processQueue() {
+    if (isProcessing) {
+        console.log('Queue processor already running');
+        return;
+    }
+
+    isProcessing = true;
+    console.log('Starting queue processing...');
+
+    while (processingQueue.length > 0) {
+        const listingData = processingQueue.shift();
+        
+        try {
+            console.log(`Processing listing ${listingData.index}: ${listingData.title}`);
+            
+            // Update button to show processing state
+            updateButtonToProcessing(listingData.index);
+            
+        } catch (error) {
+            console.error(`Error processing listing ${listingData.index}:`, error);
+            updateButtonToError(listingData.index);
+        }
+        
+        // Small delay between listings to avoid overwhelming the page
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    isProcessing = false;
+    console.log('Queue processing completed');
+}
+
+function updateButtonToProcessing(listingIndex) {
+    const button = getButtonForListing(listingIndex);
+    if (button) {
+        button.innerText = 'Processing...';
+        button.style.backgroundColor = '#FFA500';
+        button.disabled = true;
+    }
+}
+
+function updateButtonToError(listingIndex) {
+    const button = getButtonForListing(listingIndex);
+    if (button) {
+        button.innerText = 'Error - Try Again';
+        button.style.backgroundColor = '#FF0000';
+        button.disabled = false;
+    }
+}
+
+function getButtonForListing(listingIndex) {
+    const listingElement = allListings[listingIndex]?.element;
+    return listingElement?.querySelector(DOM_SELECTORS.BUTTON_CLASS);
+}
 
 // Clean up observer
 window.addEventListener('beforeunload', () => {
