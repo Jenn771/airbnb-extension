@@ -317,6 +317,16 @@ async function processQueue() {
             // Update button to show processing state
             updateButtonToProcessing(listingData.index);
             
+            // Process the listing
+            const result = await processListing(listingData);
+            
+            if (result) {
+                console.log(`Successfully processed listing ${listingData.index}`);
+                
+            } else {
+                console.warn(`Failed to process listing ${listingData.index}`);
+                updateButtonToError(listingData.index);
+            }
         } catch (error) {
             console.error(`Error processing listing ${listingData.index}:`, error);
             updateButtonToError(listingData.index);
@@ -329,6 +339,27 @@ async function processQueue() {
     isProcessing = false;
     console.log('Queue processing completed');
 }
+
+async function processListing(listingData) {
+    return new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage({
+            type: "OPEN_LISTING_TAB",
+            link: listingData.link
+        }, (response) => {
+            if (chrome.runtime.lastError) {
+                console.error("Message failed:", chrome.runtime.lastError);
+                resolve(null);
+            } else if (response && response.success) {
+                console.log("Background opened and closed tab:", response.tabId);
+                resolve({ status: "opened", tabId: response.tabId });
+            } else {
+                console.warn("Failed to open tab via background.");
+                resolve(null);
+            }
+        });
+    });
+}
+
 
 function updateButtonToProcessing(listingIndex) {
     const button = getButtonForListing(listingIndex);

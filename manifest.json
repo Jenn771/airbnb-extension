@@ -8,6 +8,9 @@
     },
     "permissions": ["scripting", "tabs", "storage"],
     "host_permissions": ["https://www.airbnb.com/*"],
+    "background": {
+        "service_worker": "src/background.js"
+    },
     "action": {
         "default_popup": "src/popup.html",
         "default_icon": {
