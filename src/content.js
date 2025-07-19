@@ -22,23 +22,25 @@ const DOM_SELECTORS = {
 // Listen for incoming messages sent from popup.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "SET_NIGHTS") {
+        // Get current search parameters
+        searchParams = getAirbnbSearchParams();
+        console.log('Search parameters:', searchParams);
+
+        if (searchParams.date_picker_type !== 'flexible_dates') {
+            alert("This extension only works with flexible date searches.\nPlease click 'Flexible' in Airbnb date picker.");
+            return;
+        }
+
         if (desiredNights === message.nights && flexibilityMode === message.flexibility) {
             return;
         }
-        
+
         desiredNights = message.nights;
         flexibilityMode = message.flexibility;
         
         console.log(`Received number of nights from popup: ${desiredNights}, flexibility: ${flexibilityMode}`);
 
-        // Get current search parameters
-        searchParams = getAirbnbSearchParams();
-        console.log('Search parameters:', searchParams);
-
-        // Clear previous results when the number of nights changes
         listingResults.clear();
-
-        // Initialize everything
         initializeExtension();
         
     }
@@ -101,6 +103,11 @@ function setMutationObserver() {
 function handlePageChange() {
     searchParams = getAirbnbSearchParams();
     console.log("Updated searchParams after DOM change:", searchParams);
+
+    if (searchParams.date_picker_type !== 'flexible_dates') {
+        alert("This extension only works with flexible date searches.\nPlease click 'Flexible' in Airbnb date picker.");
+        return;
+    }
 
     // Clear results
     listingResults.clear();
