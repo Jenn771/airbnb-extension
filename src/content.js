@@ -351,7 +351,15 @@ async function processListing(listingData) {
     return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({
             type: "OPEN_LISTING_TAB",
-            link: listingData.link
+            link: listingData.link,
+            mode: flexibilityMode,
+            nights: desiredNights,
+            tripLength: searchParams.flexible_trip_lengths,
+            months: searchParams.flexible_trip_dates,
+            priceRange: {
+                min: searchParams.price_min || null,
+                max: searchParams.price_max || null
+            }
         }, (response) => {
             if (chrome.runtime.lastError) {
                 console.error("Message failed:", chrome.runtime.lastError);
