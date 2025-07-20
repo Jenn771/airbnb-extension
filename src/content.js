@@ -348,6 +348,10 @@ async function processQueue() {
 }
 
 async function processListing(listingData) {
+    const monthsToCheck = searchParams.flexible_trip_dates.length > 0 
+        ? searchParams.flexible_trip_dates 
+        : determineTargetMonths();
+
     return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({
             type: "OPEN_LISTING_TAB",
@@ -355,7 +359,7 @@ async function processListing(listingData) {
             mode: flexibilityMode,
             nights: desiredNights,
             tripLength: searchParams.flexible_trip_lengths,
-            months: searchParams.flexible_trip_dates,
+            months: monthsToCheck,
             priceRange: {
                 min: searchParams.price_min || null,
                 max: searchParams.price_max || null
@@ -375,6 +379,16 @@ async function processListing(listingData) {
     });
 }
 
+// Generate 3 months if user didn't select any months
+function determineTargetMonths() {
+    const currentDate = new Date();
+    const months = [];
+    for (let i = 0; i < 3; i++) {
+        const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + i, 1);
+        months.push(monthDate.toLocaleString('en-US', { month: 'long' }).toLowerCase());
+    }
+    return months;
+}
 
 function updateButtonToProcessing(listingIndex) {
     const button = getButtonForListing(listingIndex);
