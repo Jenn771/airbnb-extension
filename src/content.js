@@ -369,8 +369,8 @@ async function processListing(listingData) {
                 console.error("Message failed:", chrome.runtime.lastError);
                 resolve(null);
             } else if (response && response.success) {
-                console.log("Background opened and closed tab:", response.tabId);
-                resolve({ status: "opened", tabId: response.tabId });
+                console.log("Background opened and closed tab");
+                resolve({ status: "opened", results: response.results });
             } else {
                 console.warn("Failed to open tab via background.");
                 resolve(null);

@@ -16,10 +16,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 });
 
                 console.log(`Tab ${tab.id} opened for ${message.link}`);
+
                 await new Promise(resolve => setTimeout(resolve, 5000));
+
+                const results = await processListingCalendar(tab.id, message);
+
                 await chrome.tabs.remove(tab.id);
 
-                sendResponse({ success: true, tabId: tab.id });
+                sendResponse({ success: true, results: results });
             } catch (error) {
                 console.error("Failed to open tab:", error);
                 sendResponse({ success: false, error: error.message });
@@ -30,3 +34,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true;
     }
 });
+
+async function processListingCalendar(tabID, message) {
+    try {
+        // TODO: get current month
+        
+        return {
+            bestDates: null,
+            bestPrice: null
+        }
+    } catch (error) {
+        console.error('Error processing calendar:', error);
+        return {
+            bestDates: null,
+            bestPrice: null
+        }
+    }
+}
