@@ -35,7 +35,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 });
 
-async function processListingCalendar(tabID, message) {
+async function processListingCalendar(tabId, message) {
     try {
         await navigateToFirstTargetMonth(tabId, message.months);
         
@@ -57,34 +57,42 @@ async function navigateToFirstTargetMonth(tabId, targetMonths) {
     const currentCalendarMonth = await getCurrentMonth(tabId);  
     const currentCalendarMonthName = currentCalendarMonth.split(' ')[0].toLowerCase(); // e.g., extract month from "October 2025" 
     const currentCalendarYear = parseInt(currentCalendarMonth.split(' ')[1]); // e.g., extract year from "October 2025"
-    console.log(`Current month on calendar: ${currentCalendarMonthName}`);
+    console.log(`Current month on calendar: ${currentCalendarMonthName} ${currentCalendarYear}`);
     
     const firstTargetMonth = targetMonths[0];
 
     // Return if the calendar is already in the first target month
     if (firstTargetMonth === currentCalendarMonthName) {
+        console.log(`Already at target month: ${currentCalendarMonthName}`);
         return currentCalendarMonthName;
     }
     
-    console.log(`Need to navigate to: ${firstTargetMonth}`);
-    
-    // Determine if we need to go forward or backward
+    // Get month indicies
     const currentCalendarMonthIndex = getMonthIndex(currentCalendarMonthName); 
     const targetMonthIndex = getMonthIndex(firstTargetMonth); 
     
 
+    // Get current real world date for year calculation
     const currentDate = new Date();
-    const currentMonthIndex = currentDate.getMonth();
+    const currentRealYear = currentDate.getFullYear();
+    const currentRealMonthIndex = currentDate.getMonth();
+    
 
-    // march 2026 (3) < may 2025(5)
-    if (targetMonthIndex < currentMonthIndex) {
-        await navigateForwardToMonth(tabId, firstTargetMonth);
+    // If target month is before current real month, it's likely next year
+    let targetYear = currentRealYear;
+
+    if (targetMonthIndex < currentRealMonthIndex) {
+        targetYear = currentRealYear + 1;
     }
+
+    // Calculate if we need to navigate forward or backward
+    const currentCalendarDate = new Date(currentCalendarYear, currentCalendarMonthIndex, 1);
+    const targetDate = new Date(targetYear, targetMonthIndex, 1);
 
 
     let navigatedMonth;
     
-    if (targetMonthIndex >= currentCalendarMonthIndex) {
+    if (targetDate > currentCalendarDate) {
         // Navigate forward
         navigatedMonth = await navigateForwardToMonth(tabId, firstTargetMonth);
     } else {
@@ -96,9 +104,6 @@ async function navigateToFirstTargetMonth(tabId, targetMonths) {
     return navigatedMonth;
 }
 
-// target = june 2026
-// currentCalendar = september
-// currentMonth = july
 
 async function getCurrentMonth(tabId) {
     const [result] = await chrome.scripting.executeScript({
@@ -127,8 +132,16 @@ async function navigateForwardToMonth(tabId, targetMonth) {
     const maxAttempts = 12; // Prevent infinite loops
     
     do {
+        // Get current month before clicking
+        currentMonth = await getCurrentMonth(tabId);
+        const currentMonthName = currentMonth.split(' ')[0].toLowerCase();
+
+        if (currentMonthName === targetMonth) {
+            return currentMonthName;
+        }
+
         // Click next month button
-        await chrome.scripting.executeScript({
+        const clickResult = await chrome.scripting.executeScript({
             target: { tabId },
             func: () => {
                 const nextButton = document.querySelector('button[aria-label="Move forward to switch to the next month."]');
@@ -143,18 +156,15 @@ async function navigateForwardToMonth(tabId, targetMonth) {
             }
         });
         
+        // If button click failed, throw error
+        if (!clickResult[0].result) {
+            throw new Error('Could not click next month button');
+        }
+
         // Wait for calendar to update
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Get the new current month
-        currentMonth = await getCurrentMonth(tabId);
-        const currentMonthName = currentMonth.split(' ')[0].toLowerCase();
-        
         attempts++;
-        
-        if (currentMonthName === targetMonth) {
-            return currentMonth;
-        }
         
     } while (attempts < maxAttempts);
     
@@ -167,8 +177,16 @@ async function navigateBackwardToMonth(tabId, targetMonth) {
     const maxAttempts = 12; // Prevent infinite loops
     
     do {
+        // Get current month before clicking
+        currentMonth = await getCurrentMonth(tabId);
+        const currentMonthName = currentMonth.split(' ')[0].toLowerCase();
+
+        if (currentMonthName === targetMonth) {
+            return currentMonthName;
+        }
+        
         // Click previous month button
-        await chrome.scripting.executeScript({
+        const clickResult = await chrome.scripting.executeScript({
             target: { tabId },
             func: () => {
                 const prevButton = document.querySelector('button[aria-label="Move backward to switch to the previous month."]');
@@ -182,19 +200,16 @@ async function navigateBackwardToMonth(tabId, targetMonth) {
                 }
             }
         });
-        
+
+        // If button click failed, throw error
+        if (!clickResult[0].result) {
+            throw new Error('Could not click previous month button');
+        }
+
         // Wait for calendar to update
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Get the new current month
-        currentMonth = await getCurrentMonth(tabId);
-        const currentMonthName = currentMonth.split(' ')[0].toLowerCase();
-        
         attempts++;
-        
-        if (currentMonthName === targetMonth) {
-            return currentMonth;
-        }
         
     } while (attempts < maxAttempts);
     
@@ -206,5 +221,10 @@ function getMonthIndex(monthName) {
         'january', 'february', 'march', 'april', 'may', 'june',
         'july', 'august', 'september', 'october', 'november', 'december'
     ];
-    return months.indexOf(monthName);
+    const index = months.indexOf(monthName);
+
+    if (index === -1) {
+        throw new Error(`Invalid month name: ${monthName}`);
+    }
+    return index;
 }
