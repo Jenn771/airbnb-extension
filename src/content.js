@@ -121,16 +121,17 @@ function getAirbnbSearchParams() {
     const url = new URL(currentURL);
     const urlParams = url.searchParams;
 
-    // Extract only the relevant search parameters used in flexible date searches
+    const flexible_trip_dates = urlParams.getAll('flexible_trip_dates[]');
+    const monthsToCheck = flexible_trip_dates.length > 0 
+        ? flexible_trip_dates 
+        : determineTargetMonths();
+        
     const searchParams = {
         // Confirms this is a flexible date search (should be "flexible_dates")
         date_picker_type: urlParams.get('date_picker_type'),
-
-        // DATE PARAMETERS
         flexible_trip_lengths: urlParams.getAll('flexible_trip_lengths[]'), // e.g., "one_week" or "weekend_trip" or "one_month"
-        flexible_trip_dates: urlParams.getAll('flexible_trip_dates[]'), // e.g., ["june", "july", "august"]
-  
-        // Price range
+        flexible_trip_dates: flexible_trip_dates, // e.g., ["june", "july", "august"]
+        monthsToCheck: monthsToCheck,
         price_min: urlParams.get('price_min') || '',
         price_max: urlParams.get('price_max') || '',
     };
@@ -348,10 +349,6 @@ async function processQueue() {
 }
 
 async function processListing(listingData) {
-    const monthsToCheck = searchParams.flexible_trip_dates.length > 0 
-        ? searchParams.flexible_trip_dates 
-        : determineTargetMonths();
-
     return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({
             type: "OPEN_LISTING_TAB",
@@ -359,7 +356,7 @@ async function processListing(listingData) {
             mode: flexibilityMode,
             nights: desiredNights,
             tripLength: searchParams.flexible_trip_lengths,
-            months: monthsToCheck,
+            months: searchParams.monthsToCheck,
             priceRange: {
                 min: searchParams.price_min || null,
                 max: searchParams.price_max || null
@@ -383,7 +380,7 @@ async function processListing(listingData) {
 function determineTargetMonths() {
     const currentDate = new Date();
     const months = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 1; i < 4; i++) {
         const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + i, 1);
         months.push(monthDate.toLocaleString('en-US', { month: 'long' }).toLowerCase());
     }
