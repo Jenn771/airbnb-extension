@@ -37,6 +37,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 async function processListingCalendar(tabId, message) {
     try {
+        await clearSelectedDates(tabId);
+
         await navigateToFirstTargetMonth(tabId, message.months);
         
         return {
@@ -49,6 +51,43 @@ async function processListingCalendar(tabId, message) {
             bestDates: null,
             bestPrice: null
         }
+    }
+}
+
+// Clear any pre-selected dates first
+async function clearSelectedDates(tabId) {
+    try {
+        const [result] = await chrome.scripting.executeScript({
+            target: { tabId },
+            func: () => {
+                const buttons = document.querySelectorAll('button[type="button"]');
+                
+                // Find the button with "Clear dates" text
+                for (const button of buttons) {
+                    if (button.textContent.trim() === "Clear dates") {
+                        button.click();
+                        console.log("Clicked Clear dates button");
+                        return true;
+                    }
+                }
+                
+                const fallback = document.querySelector('button.l1ovpqvx');
+                if (fallback && fallback.textContent.includes("Clear")) {
+                    fallback.click();
+                    return true;
+                }
+                
+                console.log("No 'Clear dates' button found");
+                return false;
+            }
+        });
+        
+        if (result?.result) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            console.log("Successfully cleared selected dates");
+        }
+    } catch (error) {
+        console.error("Error clearing selected dates:", error);
     }
 }
 
