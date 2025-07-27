@@ -31,6 +31,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             return;
         }
 
+        const tripLengths = searchParams.flexible_trip_lengths || [];
+        if (tripLengths.includes("one_month")) {
+            alert("This extension does not support 'Monthly stays'.\nPlease choose 'Weekend' or 'Week' instead.");
+            return;
+        }
+
         if (desiredNights === message.nights && flexibilityMode === message.flexibility) {
             return;
         }
@@ -106,6 +112,12 @@ function handlePageChange() {
 
     if (searchParams.date_picker_type !== 'flexible_dates') {
         alert("This extension only works with flexible date searches.\nPlease click 'Flexible' in Airbnb date picker.");
+        return;
+    }
+
+    const tripLengths = searchParams.flexible_trip_lengths || [];
+    if (tripLengths.includes("one_month")) {
+        alert("This extension does not support 'Monthly stays'.\nPlease choose 'Weekend' or 'Week' instead.");
         return;
     }
 
@@ -235,10 +247,18 @@ function getAirbnbSearchParams() {
     const urlParams = url.searchParams;
 
     const flexible_trip_dates = urlParams.getAll('flexible_trip_dates[]');
+    const flexible_trip_lengths = urlParams.getAll('flexible_trip_lengths[]');
 
-    const reorderedMonths = flexible_trip_dates.length > 0 
-        ? reorderMonths(flexible_trip_dates)
-        : determineTargetMonths();
+    let reorderedMonths;
+
+    if (flexible_trip_lengths.includes("one_month")) {
+        // Do not reorder months if 'one_month' is selected
+        reorderedMonths = flexible_trip_dates;
+    } else {
+        reorderedMonths = flexible_trip_dates.length > 0
+            ? reorderMonths(flexible_trip_dates)
+            : determineTargetMonths();
+    }
         
     const searchParams = {
         // Confirms this is a flexible date search (should be "flexible_dates")
