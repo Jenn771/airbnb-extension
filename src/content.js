@@ -115,6 +115,119 @@ function handlePageChange() {
     processAllListings();
 }
 
+// Function to extract the first month from "Week/Weekend in" text
+function getFirstMonthFromUI() {
+    const selectors = [
+        'span[id="searchInputDescriptionId"]',
+        '[data-testid="little-search-date"] span',
+        '[data-testid="little-search-date"] div'
+    ];
+
+    let searchText = '';
+    
+    for (const selector of selectors) {
+        const element = document.querySelector(selector);
+        if (element && element.textContent) {
+            const text = element.textContent.trim();
+            if (text.includes('Week in') || text.includes('Weekend in')) {
+                searchText = text;
+                break;
+            }
+        }
+    }
+
+
+    if (!searchText) {
+        return null;
+    }
+
+    // Extract the first month abbreviation after "Week in" or "Weekend in"
+    const firstMonthMatch = searchText.match(/Week(?:end)? in (\w{3})/i);
+    
+    if (!firstMonthMatch) {
+        return null;
+    }
+
+    const firstMonthAbbr = firstMonthMatch[1];
+    
+    const monthMap = {
+        'jan': 'january', 'feb': 'february', 'mar': 'march', 'apr': 'april',
+        'may': 'may', 'jun': 'june', 'jul': 'july', 'aug': 'august',
+        'sep': 'september', 'oct': 'october', 'nov': 'november', 'dec': 'december'
+    };
+
+    const firstMonth = monthMap[firstMonthAbbr.toLowerCase()];
+    
+    return firstMonth;
+}
+
+// Function to reorder months starting with the first month from UI
+function reorderMonths(flexible_trip_dates) {
+    if (!flexible_trip_dates || flexible_trip_dates.length === 0) {
+        return flexible_trip_dates;
+    }
+
+    const firstMonth = getFirstMonthFromUI();
+    
+    if (!firstMonth) {
+        console.log('Could not determine first month from UI, using original order');
+        return flexible_trip_dates;
+    }
+
+    // Find the index of the first month in the original array
+    const firstMonthIndex = flexible_trip_dates.indexOf(firstMonth);
+    
+    if (firstMonthIndex === -1) {
+        return flexible_trip_dates;
+    }
+
+    const standardMonthOrder = [
+        'january', 'february', 'march', 'april', 'may', 'june',
+        'july', 'august', 'september', 'october', 'november', 'december'
+    ];
+
+    // Get the index of the first month
+    const firstMonthStandardIndex = standardMonthOrder.indexOf(firstMonth);
+    
+    // Create a reordered array
+    const reordered = [];
+    const remaining = [...flexible_trip_dates];
+    
+    reordered.push(firstMonth);
+    remaining.splice(remaining.indexOf(firstMonth), 1);
+    
+    // Add subsequent months in chronological order
+    let currentMonthIndex = firstMonthStandardIndex;
+    
+    while (remaining.length > 0) {
+        currentMonthIndex = (currentMonthIndex + 1) % 12;
+        const nextMonth = standardMonthOrder[currentMonthIndex];
+        
+        const monthIndex = remaining.indexOf(nextMonth);
+        if (monthIndex !== -1) {
+            reordered.push(nextMonth);
+            remaining.splice(monthIndex, 1);
+        }
+        
+        // Safety check
+        if (reordered.length >= flexible_trip_dates.length) {
+            break;
+        }
+    }
+    
+    // Add any remaining months in chronological order
+    if (remaining.length > 0) {
+        const sortedRemaining = remaining.sort((a, b) => {
+            const aIndex = standardMonthOrder.indexOf(a);
+            const bIndex = standardMonthOrder.indexOf(b);
+            return aIndex - bIndex;
+        });
+        reordered.push(...sortedRemaining);
+    }
+    
+    return reordered;
+}
+
 // Function to extract search parameters from current Airbnb URL
 function getAirbnbSearchParams() {
     const currentURL = window.location.href;
@@ -122,8 +235,9 @@ function getAirbnbSearchParams() {
     const urlParams = url.searchParams;
 
     const flexible_trip_dates = urlParams.getAll('flexible_trip_dates[]');
-    const monthsToCheck = flexible_trip_dates.length > 0 
-        ? flexible_trip_dates 
+
+    const reorderedMonths = flexible_trip_dates.length > 0 
+        ? reorderMonths(flexible_trip_dates)
         : determineTargetMonths();
         
     const searchParams = {
@@ -131,7 +245,7 @@ function getAirbnbSearchParams() {
         date_picker_type: urlParams.get('date_picker_type'),
         flexible_trip_lengths: urlParams.getAll('flexible_trip_lengths[]'), // e.g., "one_week" or "weekend_trip" or "one_month"
         flexible_trip_dates: flexible_trip_dates, // e.g., ["june", "july", "august"]
-        monthsToCheck: monthsToCheck,
+        monthsToCheck: reorderedMonths, 
         price_min: urlParams.get('price_min') || '',
         price_max: urlParams.get('price_max') || '',
     };
