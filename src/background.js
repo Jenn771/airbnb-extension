@@ -42,7 +42,7 @@ async function processListingCalendar(tabId, message) {
     try {
         await clearSelectedDates(tabId);
 
-        const firstTargetMonth = await navigateToFirstTargetMonth(tabId, message.months);
+        await navigateToFirstTargetMonth(tabId, message.months);
         
         // Check flexibility constraints
         if (message.mode === "respect") {
