@@ -265,9 +265,7 @@ function getAirbnbSearchParams() {
         date_picker_type: urlParams.get('date_picker_type'),
         flexible_trip_lengths: urlParams.getAll('flexible_trip_lengths[]'), // e.g., "one_week" or "weekend_trip" or "one_month"
         flexible_trip_dates: flexible_trip_dates, // e.g., ["june", "july", "august"]
-        monthsToCheck: reorderedMonths, 
-        price_min: urlParams.get('price_min') || '',
-        price_max: urlParams.get('price_max') || '',
+        monthsToCheck: reorderedMonths
     };
     
     return searchParams;
@@ -490,11 +488,7 @@ async function processListing(listingData) {
             mode: flexibilityMode,
             nights: desiredNights,
             tripLength: searchParams.flexible_trip_lengths,
-            months: searchParams.monthsToCheck,
-            priceRange: {
-                min: searchParams.price_min || null,
-                max: searchParams.price_max || null
-            }
+            months: searchParams.monthsToCheck
         }, (response) => {
             if (chrome.runtime.lastError) {
                 console.error("Message failed:", chrome.runtime.lastError);
