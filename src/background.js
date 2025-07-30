@@ -38,6 +38,29 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 });
 
+function parsePrice(priceString) {
+    return parseFloat(priceString.replace(/[$,]/g, ''));
+}
+
+// Helper function to find cheapest combination
+function findCheapestCombination(combinations) {
+    if (!combinations || combinations.length === 0) {
+        return { bestDates: null, bestPrice: null };
+    }
+
+    // Sort by price
+    const sortedCombinations = combinations.sort((a, b) => {
+        const priceA = parsePrice(a.totalPrice);
+        const priceB = parsePrice(b.totalPrice);
+        return priceA - priceB;
+    });
+
+    return {
+        bestDates: sortedCombinations[0].dateRange,
+        bestPrice: sortedCombinations[0].totalPrice
+    };
+}
+
 async function processListingCalendar(tabId, message) {
     try {
         await clearSelectedDates(tabId);
@@ -48,18 +71,12 @@ async function processListingCalendar(tabId, message) {
         if (message.mode === "respect") {
             if (message.tripLength.includes("weekend_trip")) {
                 const weekendResults = await findWeekendCombinations(tabId, message.months);
-                return {
-                    bestDates: weekendResults[0]?.dateRange || null,
-                    bestPrice: weekendResults[0]?.totalPrice || null
-                };
+                return findCheapestCombination(weekendResults);
             }
-            if (message.tripLength.includes("one_week")) {
+            else if (message.tripLength.includes("one_week")) {
                 /* 
                 const weekResults = await findWeekCombinations(tabId, message.months);
-                return {
-                    bestDates: weekResults[0]?.dateRange || null,
-                    bestPrice: weekResults[0]?.totalPrice || null
-                }; 
+                return findCheapestCombination(weekResults); 
                 */
             }
         }
@@ -68,10 +85,7 @@ async function processListingCalendar(tabId, message) {
             // Find N-night sequences of consecutive available days
             /* 
             const flexibleResults = await findNNightCombinations(tabId, message.months, message.nights);
-            return {
-                bestDates: flexibleResults[0]?.dateRange || null,
-                bestPrice: flexibleResults[0]?.totalPrice || null
-            };
+            return findCheapestCombination(flexibleResults);
              */
         }
 
