@@ -38,6 +38,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 });
 
+// Helper function to remove year from date range
+function removeYearFromDateRange(dateRange) {
+    if (!dateRange) return dateRange;
+    
+    return dateRange.replace(/,\s*\d{4}/g, '');
+}
+
 function parsePrice(priceString) {
     return parseFloat(priceString.replace(/[$,]/g, ''));
 }
@@ -56,7 +63,7 @@ function findCheapestCombination(combinations) {
     });
 
     return {
-        bestDates: sortedCombinations[0].dateRange,
+        bestDates: removeYearFromDateRange(sortedCombinations[0].dateRange),
         bestPrice: sortedCombinations[0].totalPrice
     };
 }
