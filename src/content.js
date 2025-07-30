@@ -328,7 +328,7 @@ function addFindBestDatesButton (listingData) {
     const existingButton = listingElement.querySelector(DOM_SELECTORS.BUTTON_CLASS);
     if (existingButton) {
         // Update existing button text in case nights changed
-        updateButtonText(existingButton, listingIndex);
+        updateInitialButtonText(button);
         return;
     }
 
@@ -363,7 +363,7 @@ function createButton(listingData, listingIndex) {
     const button = document.createElement("button");
     button.className = 'find-best-dates-btn';
     button.style.cssText = `
-        background-color: #FF5A5F;
+        background-color: #0069A6;
         color: white;
         border: none;
         padding: 4px 8px;
@@ -376,16 +376,12 @@ function createButton(listingData, listingIndex) {
     `;
 
     // Set initial button text
-    updateButtonText(button, listingIndex);
+    updateInitialButtonText(button);
 
     const handleClick = (event) => {
         event.stopPropagation();
         event.preventDefault();
         event.stopImmediatePropagation();
-
-        /* console.log(`Button clicked for: ${listingData.title}`);
-        console.log(`User wants ${desiredNights} nights, flexibility: ${flexibilityMode}`);
-        */
 
         // Add listing to the processing queue 
         addToQueue(listingData);
@@ -398,19 +394,11 @@ function createButton(listingData, listingIndex) {
     return button;
 }
 
-// Update button text based on current state
-function updateButtonText(button, listingIndex) {
-    const result = listingResults.get(listingIndex);
-
-    if(result) {
-        // Show the calcualte result
-        button.innerText = "TODO: show best price and date range";
-        button.style.backgroundColor = '#00A699';
-        button.disabled = true; 
-    } else {
-        // Show default text
+// Set initial button text
+function updateInitialButtonText(button) {
+    if (button) {
         button.innerText = `Find Best ${desiredNights}-Night Dates`;
-        button.style.backgroundColor = '#FF5A5F';
+        button.style.backgroundColor = '#0069A6';
         button.disabled = false;
     }
 }
@@ -450,7 +438,7 @@ async function processQueue() {
 
     while (processingQueue.length > 0) {
         const listingData = processingQueue.shift();
-        
+
         try {
             console.log(`Processing listing ${listingData.index}: ${listingData.title}`);
             
@@ -460,9 +448,12 @@ async function processQueue() {
             // Process the listing
             const result = await processListing(listingData);
             
-            if (result) {
+            if (result && result.results) {
                 console.log(`Successfully processed listing ${listingData.index}`);
                 
+                // Update button with results
+                updateButtonWithResult(listingData.index, result.results);
+
             } else {
                 console.warn(`Failed to process listing ${listingData.index}`);
                 updateButtonToError(listingData.index);
@@ -519,7 +510,7 @@ function updateButtonToProcessing(listingIndex) {
     const button = getButtonForListing(listingIndex);
     if (button) {
         button.innerText = 'Processing...';
-        button.style.backgroundColor = '#FFA500';
+        button.style.backgroundColor = '#6097B3';
         button.disabled = true;
     }
 }
@@ -530,6 +521,20 @@ function updateButtonToError(listingIndex) {
         button.innerText = 'Error - Try Again';
         button.style.backgroundColor = '#FF0000';
         button.disabled = false;
+    }
+}
+
+function updateButtonWithResult(listingIndex, result) {
+    const button = getButtonForListing(listingIndex);
+    
+    if (button && result && result.bestDates && result.bestPrice) {
+        button.innerHTML = `<strong>${result.bestPrice}</strong> • ${result.bestDates}`;
+        button.style.backgroundColor = '#6097B3';
+        button.disabled = true;
+    } else if (button && result && (!result.bestDates || !result.bestPrice)) {
+        button.innerText = 'No Available Dates';
+        button.style.backgroundColor = '#808080';
+        button.disabled = true;
     }
 }
 
