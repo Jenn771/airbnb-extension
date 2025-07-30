@@ -96,7 +96,8 @@ async function checkRegularWeekend(tabId, weekIdx) {
             function extractTotalPrice() {
                 const priceSelectors = [
                     'button span.umg93v9',
-                    'div[aria-hidden="true"] span.umg93v9'
+                    'div[aria-hidden="true"] span.umg93v9',
+                    'span.umuerxh.atm_7l_dezgoh.atm_rd_us8791.atm_cs_1529pqs__oggzyc.atm_cs_kyjlp1__1v156lz'
                 ];
 
                 for (const selector of priceSelectors) {
@@ -258,7 +259,8 @@ async function checkCrossMonthWeekend(tabId, nextMonth) {
             function extractTotalPrice() {
                 const priceSelectors = [
                     'button span.umg93v9',
-                    'div[aria-hidden="true"] span.umg93v9'
+                    'div[aria-hidden="true"] span.umg93v9',
+                    'span.umuerxh.atm_7l_dezgoh.atm_rd_us8791.atm_cs_1529pqs__oggzyc.atm_cs_kyjlp1__1v156lz'
                 ];
 
                 for (const selector of priceSelectors) {
