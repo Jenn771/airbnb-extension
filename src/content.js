@@ -448,7 +448,7 @@ async function processQueue() {
             // Process the listing
             const result = await processListing(listingData);
             
-            if (result && result.results) {
+            if (result && result.success && result.results) {
                 console.log(`Successfully processed listing ${listingData.index}`);
                 
                 // Update button with results
@@ -486,7 +486,7 @@ async function processListing(listingData) {
                 resolve(null);
             } else if (response && response.success) {
                 console.log("Background opened and closed tab");
-                resolve({ status: "opened", results: response.results });
+                resolve({ success: true, results: response.results });
             } else {
                 console.warn("Failed to open tab via background.");
                 resolve(null);
@@ -509,9 +509,10 @@ function determineTargetMonths() {
 function updateButtonToProcessing(listingIndex) {
     const button = getButtonForListing(listingIndex);
     if (button) {
-        button.innerText = 'Processing...';
+        button.innerText = 'Loading...';
         button.style.backgroundColor = '#6097B3';
         button.disabled = true;
+        button.title = 'Processing this listing...';
     }
 }
 
@@ -521,6 +522,7 @@ function updateButtonToError(listingIndex) {
         button.innerText = 'Error - Try Again';
         button.style.backgroundColor = '#FF0000';
         button.disabled = false;
+        button.title = 'Something went wrong. Click to try again.';
     }
 }
 
