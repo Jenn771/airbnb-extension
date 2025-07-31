@@ -450,12 +450,14 @@ async function processQueue() {
             
             if (result && result.success && result.results) {
                 console.log(`Successfully processed listing ${listingData.index}`);
-                
-                // Update button with results
                 updateButtonWithResult(listingData.index, result.results);
 
+            } else if (result && result.success === false) {
+                console.warn(`Failed to process listing ${listingData.index}: ${result.error}`);
+                updateButtonToError(listingData.index);
             } else {
-                console.warn(`Failed to process listing ${listingData.index}`);
+                // NULL/UNDEFINED:
+                console.warn(`No response for listing ${listingData.index}`);
                 updateButtonToError(listingData.index);
             }
         } catch (error) {
@@ -485,8 +487,11 @@ async function processListing(listingData) {
                 console.error("Message failed:", chrome.runtime.lastError);
                 resolve(null);
             } else if (response && response.success) {
-                console.log("Background opened and closed tab");
+                console.log("Success: true");
                 resolve({ success: true, results: response.results });
+            } else if (response && !response.success) {
+                console.log("Success: false");
+                resolve({ success: false, error: response.error });
             } else {
                 console.warn("Failed to open tab via background.");
                 resolve(null);
@@ -520,7 +525,7 @@ function updateButtonToError(listingIndex) {
     const button = getButtonForListing(listingIndex);
     if (button) {
         button.innerText = 'Error - Try Again';
-        button.style.backgroundColor = '#FF0000';
+        button.style.backgroundColor = '#D9534F';
         button.disabled = false;
         button.title = 'Something went wrong. Click to try again.';
     }

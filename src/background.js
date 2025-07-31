@@ -4,8 +4,9 @@ import { findWeekendCombinations } from './searchModes/index.js';
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "OPEN_LISTING_TAB") {
         (async () => {
+            let tab;
             try {
-                const tab = await new Promise((resolve, reject) => {
+                tab = await new Promise((resolve, reject) => {
                     chrome.tabs.create({
                         url: message.link,
                         active: false
@@ -26,9 +27,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
                 await chrome.tabs.remove(tab.id);
 
-                sendResponse({ success: true, results: results });
+                if (results && results.hasError) {
+                    // Processing error (navigation, DOM issues, etc.)
+                    sendResponse({ success: false, error: results.errorMessage });
+                } else {
+                    sendResponse({ success: true, results: results });
+                }
+                
             } catch (error) {
                 console.error("Failed to open tab:", error);
+
+                if (tab && tab.id) {
+                    try {
+                        await chrome.tabs.remove(tab.id);
+                    } catch (closeError) {
+                        console.error("Failed to close tab:", closeError);
+                    }
+                }
+
                 sendResponse({ success: false, error: error.message });
             }
         })();
@@ -52,7 +68,7 @@ function parsePrice(priceString) {
 // Helper function to find cheapest combination
 function findCheapestCombination(combinations) {
     if (!combinations || combinations.length === 0) {
-        return { bestDates: null, bestPrice: null };
+        return { bestDates: null, bestPrice: null, hasError: false };
     }
 
     // Sort by price
@@ -64,7 +80,8 @@ function findCheapestCombination(combinations) {
 
     return {
         bestDates: removeYearFromDateRange(sortedCombinations[0].dateRange),
-        bestPrice: sortedCombinations[0].totalPrice
+        bestPrice: sortedCombinations[0].totalPrice,
+        hasError: false
     };
 }
 
@@ -96,17 +113,17 @@ async function processListingCalendar(tabId, message) {
              */
         }
 
+        return { bestDates: null, bestPrice: null, hasError: false };
 
-        return {
-            bestDates: null,
-            bestPrice: null
-        }
     } catch (error) {
         console.error('Error processing calendar:', error);
+        
         return {
             bestDates: null,
-            bestPrice: null
-        }
+            bestPrice: null,
+            hasError: true,
+            errorMessage: error.message
+        };
     }
 }
 
