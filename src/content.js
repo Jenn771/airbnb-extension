@@ -419,10 +419,24 @@ function addToQueue(listingData) {
     });
 
     console.log(`Added listing ${listingData.index} to queue. Queue length: ${processingQueue.length}`);
-
+    
+    // Update button to show it's queued
+    updateButtonToQueued(listingData.index);
+    
     // Start processing
     if (!isProcessing) {
         processQueue();
+    }
+}
+
+// Show button is queued but not yet processing
+function updateButtonToQueued(listingIndex) {
+    const button = getButtonForListing(listingIndex);
+    if (button) {
+        button.innerText = 'Queued...';
+        button.style.backgroundColor = '#4A90A4';
+        button.disabled = true;
+        button.title = 'Added to queue, waiting to be processed...';
     }
 }
 
@@ -514,10 +528,10 @@ function determineTargetMonths() {
 function updateButtonToProcessing(listingIndex) {
     const button = getButtonForListing(listingIndex);
     if (button) {
-        button.innerText = 'Loading...';
-        button.style.backgroundColor = '#6097B3';
+        button.innerText = 'Processing...';
+        button.style.backgroundColor = '#2E7D9A';
         button.disabled = true;
-        button.title = 'Processing this listing...';
+        button.title = 'Currently processing this listing...';
     }
 }
 
@@ -538,10 +552,12 @@ function updateButtonWithResult(listingIndex, result) {
         button.innerHTML = `<strong>${result.bestPrice}</strong> • ${result.bestDates}`;
         button.style.backgroundColor = '#6097B3';
         button.disabled = true;
+        button.title = `Best price: ${result.bestPrice} for dates: ${result.bestDates}`;
     } else if (button && result && (!result.bestDates || !result.bestPrice)) {
         button.innerText = 'No Available Dates';
         button.style.backgroundColor = '#808080';
         button.disabled = true;
+        button.title = 'No available dates found for this listing';
     }
 }
 
