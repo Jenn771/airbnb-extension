@@ -125,6 +125,31 @@ async function checkRegularWeekend(tabId, weekIdx) {
                 return null;
             }
 
+            function waitForUIUpdate(callback) {
+                let attempts = 0;
+                const maxAttempts = 20;
+                
+                const checkForData = () => {
+                    const dateRange = extractDateRange();
+                    const price = extractTotalPrice();
+                    
+                    if (dateRange && price) {
+                        callback({ dateRange, totalPrice: price });
+                        return;
+                    }
+                    
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        setTimeout(checkForData, 100);
+                    } else {
+                        console.warn("Timeout waiting for price/date data");
+                        callback(null);
+                    }
+                };
+                
+                checkForData();
+            }
+
             return new Promise((resolve) => {
                 const currentMonthContainer = document.querySelector('div._ytfarf[data-visible="true"]');
                 const table = currentMonthContainer?.querySelector('table._cvkwaj');
@@ -169,21 +194,17 @@ async function checkRegularWeekend(tabId, weekIdx) {
                 setTimeout(() => {
                     sundayBtn.click();
                     
-                    setTimeout(() => {
-                        const checkInOut = extractDateRange();
-                        const totalPrice = extractTotalPrice();
-                        
-                        if (checkInOut && totalPrice) {
-                            console.log("Found regular weekend:", checkInOut, totalPrice);
-                            resolve({
-                                dateRange: checkInOut,
-                                totalPrice: totalPrice
-                            });
+                    // Wait for UI to update with pricing information
+                    waitForUIUpdate((result) => {
+                        if (result) {
+                            console.log("Found regular weekend:", result.dateRange, result.totalPrice);
+                            resolve(result);
                         } else {
+                            console.log("No price/date data found after selection");
                             resolve('need_clear');
                         }
-                    }, 1000);
-                }, 200);
+                    });
+                }, 300);
             });
         },
         args: [weekIdx]
@@ -288,6 +309,31 @@ async function checkCrossMonthWeekend(tabId, nextMonth) {
                 return null;
             }
 
+            function waitForUIUpdate(callback) {
+                let attempts = 0;
+                const maxAttempts = 20;
+                
+                const checkForData = () => {
+                    const dateRange = extractDateRange();
+                    const price = extractTotalPrice();
+                    
+                    if (dateRange && price) {
+                        callback({ dateRange, totalPrice: price });
+                        return;
+                    }
+                    
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        setTimeout(checkForData, 100);
+                    } else {
+                        console.warn("Timeout waiting for cross-month price/date data");
+                        callback(null);
+                    }
+                };
+                
+                checkForData();
+            }
+
             return new Promise((resolve) => {
                 const currentMonthContainer = document.querySelector('div._ytfarf[data-visible="true"]');
                 const table = currentMonthContainer?.querySelector('table._cvkwaj');
@@ -309,20 +355,15 @@ async function checkCrossMonthWeekend(tabId, nextMonth) {
                 
                 sundayBtn.click();
                 
-                setTimeout(() => {
-                    const checkInOut = extractDateRange();
-                    const totalPrice = extractTotalPrice();
-                    
-                    if (checkInOut && totalPrice) {
-                        console.log("Found cross-month weekend:", checkInOut, totalPrice);
-                        resolve({
-                            dateRange: checkInOut,
-                            totalPrice: totalPrice
-                        });
+                waitForUIUpdate((result) => {
+                    if (result) {
+                        console.log("Found cross-month weekend:", result.dateRange, result.totalPrice);
+                        resolve(result);
                     } else {
+                        console.log("No cross-month price/date data found");
                         resolve('need_clear');
                     }
-                }, 1000);
+                });
             });
         }
     });
@@ -331,8 +372,6 @@ async function checkCrossMonthWeekend(tabId, nextMonth) {
         await clearSelectedDates(tabId);
         return null;
     }
-
-    await new Promise(resolve => setTimeout(resolve, 500));
     
     return sundayResult[0].result;
 }
