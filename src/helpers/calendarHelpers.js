@@ -32,6 +32,7 @@ async function clearSelectedDates(tabId) {
         }
     } catch (error) {
         console.error("Error clearing selected dates:", error);
+        throw error;
     }
 }
 
