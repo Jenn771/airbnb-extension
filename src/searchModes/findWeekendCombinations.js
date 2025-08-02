@@ -40,10 +40,14 @@ async function processMonthWeekends(tabId, currentMonth, nextMonth, canCheckNext
         target: { tabId },
         func: () => {
             const currentMonthContainer = document.querySelector('div._ytfarf[data-visible="true"]');
-            if (!currentMonthContainer) return null;
+            if (!currentMonthContainer) {
+                throw new Error('Calendar container not found');
+            }
             
             const table = currentMonthContainer.querySelector('table._cvkwaj');
-            if (!table) return null;
+            if (!table) {
+                throw new Error('Calendar table not found');
+            }
             
             const allWeeks = table.querySelectorAll('tbody tr');
             return allWeeks.length;
@@ -51,7 +55,9 @@ async function processMonthWeekends(tabId, currentMonth, nextMonth, canCheckNext
     });
     
     const weekCount = monthData[0].result;
-    if (!weekCount) return combinations;
+    if (!weekCount) {
+        throw new Error(`No weeks found for month ${currentMonth}`);
+    }
     
     // Process each week in current month
     for (let weekIdx = 0; weekIdx < weekCount; weekIdx++) {
