@@ -27,7 +27,7 @@ async function clearSelectedDates(tabId) {
         });
         
         if (result?.result) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 300));
             console.log("Successfully cleared selected dates");
         }
     } catch (error) {
@@ -37,6 +37,8 @@ async function clearSelectedDates(tabId) {
 }
 
 async function getCurrentMonth(tabId) {
+    await ensureTabActive(tabId);
+
     const [result] = await chrome.scripting.executeScript({
         target: { tabId },
         func: () => {
@@ -57,11 +59,23 @@ async function getCurrentMonth(tabId) {
     return result.result;
 }
 
+// Helper function to ensure tab is active
+async function ensureTabActive(tabId) {
+    try {
+        await chrome.tabs.update(tabId, { active: true });
+        await new Promise(resolve => setTimeout(resolve, 200));
+    } catch (error) {
+        console.warn("Could not activate tab:", error);
+    }
+}
+
 async function navigateForwardToMonth(tabId, targetMonth) {
     let currentMonth;
     let attempts = 0;
     const maxAttempts = 12; // Prevent infinite loops
     
+    await ensureTabActive(tabId);
+
     do {
         // Get current month before clicking
         currentMonth = await getCurrentMonth(tabId);
@@ -94,7 +108,7 @@ async function navigateForwardToMonth(tabId, targetMonth) {
         }
 
         // Wait for calendar to update
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 600));
         
         attempts++;
         
@@ -107,6 +121,8 @@ async function navigateBackwardToMonth(tabId, targetMonth) {
     let currentMonth;
     let attempts = 0;
     const maxAttempts = 12; // Prevent infinite loops
+
+    await ensureTabActive(tabId);
     
     do {
         // Get current month before clicking
@@ -139,7 +155,7 @@ async function navigateBackwardToMonth(tabId, targetMonth) {
         }
 
         // Wait for calendar to update
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 600));
         
         attempts++;
         

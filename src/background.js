@@ -24,7 +24,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 const [originalTab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
                 await chrome.tabs.update(tab.id, { active: true });
-                await new Promise(resolve => setTimeout(resolve, 5000));
+                await new Promise(resolve => setTimeout(resolve, 3500));
 
                 const results = await processListingCalendar(tab.id, message);
 
