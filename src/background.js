@@ -21,14 +21,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
                 console.log(`Tab ${tab.id} opened for ${message.link}`);
 
+                const [originalTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+                await chrome.tabs.update(tab.id, { active: true });
                 await new Promise(resolve => setTimeout(resolve, 5000));
 
                 const results = await processListingCalendar(tab.id, message);
 
+                // Return to original tab after processing
+                if (originalTab && originalTab.id) {
+                    await chrome.tabs.update(originalTab.id, { active: true });
+                }
+
                 await chrome.tabs.remove(tab.id);
 
                 if (results && results.hasError) {
-                    // Processing error (navigation, DOM issues, etc.)
                     sendResponse({ success: false, error: results.errorMessage });
                 } else {
                     sendResponse({ success: true, results: results });
@@ -45,14 +52,30 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     }
                 }
 
+                if (originalTab && originalTab.id) {
+                    try {
+                        await chrome.tabs.update(originalTab.id, { active: true });
+                    } catch (focusError) {
+                        console.warn("Could not return to original tab during cleanup:", focusError);
+                    }
+                }
+
                 sendResponse({ success: false, error: error.message });
             }
         })();
 
-        // allows sendResponse to be called asynchronously
         return true;
     }
 });
+
+async function ensureTabActive(tabId) {
+    try {
+        await chrome.tabs.update(tabId, { active: true });
+        await new Promise(resolve => setTimeout(resolve, 300));
+    } catch (error) {
+        console.warn("Could not activate tab:", error);
+    }
+}
 
 // Helper function to remove year from date range
 function removeYearFromDateRange(dateRange) {
@@ -87,6 +110,8 @@ function findCheapestCombination(combinations) {
 
 async function processListingCalendar(tabId, message) {
     try {
+        await ensureTabActive(tabId);
+
         await clearSelectedDates(tabId);
 
         await navigateToFirstTargetMonth(tabId, message.months);
@@ -128,6 +153,8 @@ async function processListingCalendar(tabId, message) {
 }
 
 async function navigateToFirstTargetMonth(tabId, targetMonths) {
+    await ensureTabActive(tabId);
+
     // Get current month on calendar
     const currentCalendarMonth = await getCurrentMonth(tabId);  
     const currentCalendarMonthName = currentCalendarMonth.split(' ')[0].toLowerCase(); // e.g., extract month from "October 2025" 
@@ -142,7 +169,7 @@ async function navigateToFirstTargetMonth(tabId, targetMonths) {
         return currentCalendarMonthName;
     }
     
-    // Get month indicies
+    // Get month indicie
     const currentCalendarMonthIndex = getMonthIndex(currentCalendarMonthName); 
     const targetMonthIndex = getMonthIndex(firstTargetMonth); 
     
