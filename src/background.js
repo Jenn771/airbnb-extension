@@ -1,5 +1,5 @@
 import { clearSelectedDates, getCurrentMonth, navigateForwardToMonth, navigateBackwardToMonth, getMonthIndex } from './helpers/calendarHelpers.js';
-import { findWeekendCombinations } from './searchModes/index.js';
+import { findWeekendCombinations, findWeekCombinations } from './searchModes/index.js';
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "OPEN_LISTING_TAB") {
@@ -123,10 +123,8 @@ async function processListingCalendar(tabId, message) {
                 return findCheapestCombination(weekendResults);
             }
             else if (message.tripLength.includes("one_week")) {
-                /* 
                 const weekResults = await findWeekCombinations(tabId, message.months);
                 return findCheapestCombination(weekResults); 
-                */
             }
         }
 
