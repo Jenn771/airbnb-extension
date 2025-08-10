@@ -1,6 +1,6 @@
 import { clearSelectedDates, navigateForwardToMonth, getMonthIndex } from '../helpers/calendarHelpers.js';
 
-export async function findWeekCombinations(tabId, months) {
+export async function findNNightCombinations(tabId, months, nights) {
     const combinations = [];
     
     for (let monthIdx = 0; monthIdx < months.length; monthIdx++) {
@@ -23,16 +23,17 @@ export async function findWeekCombinations(tabId, months) {
             tabId, 
             currentMonth, 
             nextMonth, 
-            isNextMonthConsecutive
+            isNextMonthConsecutive, 
+            nights
         );
         
         combinations.push(...monthCombinations);
     }
-    console.log("Final combinations:", combinations);
+    console.log(`Final ${nights}-night combinations:`, combinations);
     return combinations;
 }
 
-async function processMonthWeeks(tabId, currentMonth, nextMonth, canCheckNextMonth) {
+async function processMonthWeeks(tabId, currentMonth, nextMonth, canCheckNextMonth, nights) {
     const combinations = [];
     let checkCrossMonth = true;
 
