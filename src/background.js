@@ -1,5 +1,5 @@
 import { clearSelectedDates, getCurrentMonth, navigateForwardToMonth, navigateBackwardToMonth, getMonthIndex } from './helpers/calendarHelpers.js';
-import { findWeekendCombinations, findWeekCombinations } from './searchModes/index.js';
+import { findWeekendCombinations, findWeekCombinations, findNNightCombinations } from './searchModes/index.js';
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "OPEN_LISTING_TAB") {
@@ -130,10 +130,8 @@ async function processListingCalendar(tabId, message) {
 
         if (message.mode === "ignore") {
             // Find N-night sequences of consecutive available days
-            /* 
             const flexibleResults = await findNNightCombinations(tabId, message.months, message.nights);
             return findCheapestCombination(flexibleResults);
-             */
         }
 
         return { bestDates: null, bestPrice: null, hasError: false };
