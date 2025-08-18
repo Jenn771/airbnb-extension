@@ -5,6 +5,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "OPEN_LISTING_TAB") {
         (async () => {
             let tab;
+            let originalTab;
+            
             try {
                 tab = await new Promise((resolve, reject) => {
                     chrome.tabs.create({
@@ -21,7 +23,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
                 console.log(`Tab ${tab.id} opened for ${message.link}`);
 
-                const [originalTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                const [currentTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                originalTab = currentTab;
 
                 await chrome.tabs.update(tab.id, { active: true });
                 await new Promise(resolve => setTimeout(resolve, 3500));
