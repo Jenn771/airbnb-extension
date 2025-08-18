@@ -17,10 +17,9 @@
             <li class="step">Click "<strong>Flexible</strong>" in Airbnb date picker</li>
             <li class="step">Choose "<strong>Weekend</strong>" or "<strong>Week</strong>" (not Month)</li>
             <li class="step">Optionally select specific months</li>
-            <li class="step">Search listings, then return here to enter nights</li>
+            <li class="step">Search listings, then return here to configure</li>
         </ol>
     </div>
-
 
     <!-- Input section -->
     <div class="input-section">
@@ -35,15 +34,21 @@
             <label class="radio-option">
                 <input type="radio" name="flexibility" value="respect" id="respectFilters" checked>
                 <div class="radio-content">
-                    <div class="radio-title">Respect Airbnb filters</div>
-                    <div class="radio-description">Respects your "Week" (5 nights) or "Weekend" (2 nights) choice and ignores your nights input</div>
+                    <div class="radio-title">Use Airbnb's trip length</div>
+                    <div class="radio-description">
+                        <strong>Nights:</strong> Uses 5 nights ("Week") or 2 nights ("Weekend")<br>
+                        <strong>Months:</strong> Uses any selected months
+                    </div>
                 </div>
             </label>
             <label class="radio-option">
                 <input type="radio" name="flexibility" value="ignore" id="ignoreFilters">
                 <div class="radio-content">
-                    <div class="radio-title">Ignore trip length</div>
-                    <div class="radio-description">Use your nights input + any months you selected in Airbnb</div>
+                    <div class="radio-title">Use custom trip length</div>
+                    <div class="radio-description">
+                        <strong>Nights:</strong> Uses your number above<br>
+                        <strong>Months:</strong> Uses any selected months
+                    </div>
                 </div>
             </label>
         </div>
