@@ -4,7 +4,7 @@ function updateButtonState() {
     const submitBtn = document.getElementById('submitBtn');
     const nights = parseInt(nightsInput.value, 10);
 
-    if (!isNaN(nights) && nights > 0) {
+    if (!isNaN(nights) && nights >= 1 && nights <= 7) {
         submitBtn.disabled = false;
     } else {
         submitBtn.disabled = true;
@@ -51,7 +51,7 @@ document.getElementById('submitBtn').addEventListener('click', () => {
     // Get the selected flexibility option
     const flexibilityOption = document.querySelector('input[name="flexibility"]:checked').value;
 
-    if (!isNaN(nights) && nights > 0) {
+    if (!isNaN(nights) && nights >= 1 && nights <= 7) {
         // Save the number of nights and flexibility option to use in the future
         chrome.storage.local.set({ 
             savedNights: nights,
@@ -69,7 +69,7 @@ document.getElementById('submitBtn').addEventListener('click', () => {
         
         window.close();
     } else {
-        alert('Please enter a valid number of nights.');
+        alert('Please enter a number between 1 and 7 nights.');
     }
 });
 
