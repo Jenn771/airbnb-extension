@@ -23,7 +23,7 @@ export async function findNNightCombinations(tabId, months, nights) {
             tabId, 
             currentMonth, 
             nextMonth, 
-            isNextMonthConsecutive,
+            Boolean(isNextMonthConsecutive),
             nights
         );
         
@@ -65,7 +65,7 @@ async function processMonthNNights(tabId, currentMonth, nextMonth, canCheckNextM
         console.log(`Processing week ${weekIdx + 1} of ${weekCount}`);
         
         // Check regular week combinations
-        const regularWeek = await checkRegularWeek(tabId, weekIdx, nights, weekCount);
+        const regularWeek = await checkRegularWeek(tabId, weekIdx, nights, weekCount, canCheckNextMonth);
 
         if (regularWeek && regularWeek.length > 0) {
             combinations.push(...regularWeek);
@@ -80,18 +80,18 @@ async function processMonthNNights(tabId, currentMonth, nextMonth, canCheckNextM
             combinations.push(...crossMonthStays);
         }
     }
-    
+
     return combinations;
 }
 
 // Check regular week combinations (same week and cross-week within same month)
-async function checkRegularWeek(tabId, weekIdx, nights, totalWeeks) {
+async function checkRegularWeek(tabId, weekIdx, nights, totalWeeks, canCheckNextMonth) {
     const combinations = [];
     
     // Get all possible starting positions for this week
     const possibleStarts = await chrome.scripting.executeScript({
         target: { tabId },
-        func: (weekIndex, requiredNights, totalWeekCount) => {
+        func: (weekIndex, requiredNights, totalWeekCount, canCheckNextMonth) => {
             function hasInvalidMinimum(label, requiredNights) {
                 const match = label.match(/(\d+)\s+night minimum/i);
                 if (!match) return false;
@@ -158,8 +158,10 @@ async function checkRegularWeek(tabId, weekIdx, nights, totalWeeks) {
                         const isCurrentWeekCombo = checkOutIndex < currentWeekButtons.length;
                         const isCrossWeekCombo = checkOutIndex >= currentWeekButtons.length && nextWeek;
                         
-                        // Skip cross-week combinations for the last week
-                        if (isCrossWeekCombo && weekIndex === totalWeekCount - 1) {
+                        // Skip cross-week combinations for the last two weeks 
+                        if (isCrossWeekCombo && 
+                            (weekIndex === totalWeekCount - 1 || 
+                            (weekIndex === totalWeekCount - 2 && canCheckNextMonth))) {
                             continue;
                         }
                         
@@ -176,7 +178,7 @@ async function checkRegularWeek(tabId, weekIdx, nights, totalWeeks) {
 
             return validCombinations;
         },
-        args: [weekIdx, nights, totalWeeks]
+        args: [weekIdx, nights, totalWeeks, canCheckNextMonth]
     });
 
     const validCombinations = possibleStarts[0].result;
@@ -446,13 +448,11 @@ async function checkCrossWeekCombination(tabId, checkInWeekIdx, checkInDayIdx, c
     return result[0].result;
 }
 
-
-// Handle cross-month combinations
 async function checkCrossMonthNNight(tabId, currentMonth, nextMonth, nights) {
     const combinations = [];
     
-    // Get all valid check-in days from the last week
-    const lastWeekCheckIns = await chrome.scripting.executeScript({
+    // Get all valid check-in days from the last two weeks
+    const lastWeeksCheckIns = await chrome.scripting.executeScript({
         target: { tabId },
         func: (requiredNights) => {
             function hasInvalidMinimum(label, requiredNights) {
@@ -468,6 +468,11 @@ async function checkCrossMonthNNight(tabId, currentMonth, nextMonth, nights) {
                        cell.getAttribute("aria-disabled") === "false") ? cell : null;
             }
 
+            function classifyCell(cell) {
+                if (!cell || !cell.hasAttribute("role")) return false;
+                if (cell.getAttribute("role") == "button") return true;
+            }
+
             const currentMonthContainer = document.querySelector('div._ytfarf[data-visible="true"]');
             const table = currentMonthContainer?.querySelector('table._cvkwaj');
             const allWeeks = table?.querySelectorAll('tbody tr');
@@ -477,40 +482,67 @@ async function checkCrossMonthNNight(tabId, currentMonth, nextMonth, nights) {
             }
 
             const lastWeek = allWeeks[allWeeks.length - 1];
-            const days = lastWeek.querySelectorAll('td');
-
-
-            // Count how many are actual cells
-            let actualDayCount = 0;
-            for (const cell of days) {
-                if (cell.getAttribute('role') === 'button') {
-                    actualDayCount++;
-                } else {
-                    break;
-                }
-            }
+            const secondLastWeek = allWeeks.length >= 2 ? allWeeks[allWeeks.length - 2] : null;
+            
+            const weeksToCheck = [];
+            if (secondLastWeek) weeksToCheck.push({ week: secondLastWeek, weekIndex: allWeeks.length - 2 });
+            if (lastWeek) weeksToCheck.push({ week: lastWeek, weekIndex: allWeeks.length - 1 });
 
             const validCheckIns = [];
-            for (let dayIdx = 0; dayIdx < days.length; dayIdx++) {
-                const btn = findEnabledButton(days[dayIdx]);
-                if (!btn) continue;
-                
-                const label = btn.getAttribute("aria-label") || "";
-                const isValidCheckIn = label.includes("check-in") &&
-                                      !hasInvalidMinimum(label, requiredNights);
-                
-                if (isValidCheckIn) {
-                    const checkOutIndex = dayIdx + requiredNights;
 
-                    const isCrossWeekCombo = checkOutIndex >= actualDayCount;
+            for (const { week, weekIndex } of weeksToCheck) {
+                const days = week.querySelectorAll('td');
 
-                    if (isCrossWeekCombo) {
-                        validCheckIns.push({
-                            checkInIndex: dayIdx,
-                            requiredNights: requiredNights
-                        });
+                for (let dayIdx = 0; dayIdx < days.length; dayIdx++) {
+                    const btn = findEnabledButton(days[dayIdx]);
+                    if (!btn) continue;
+                    
+                    const label = btn.getAttribute("aria-label") || "";
+                    const isValidCheckIn = label.includes("check-in") &&
+                                          !hasInvalidMinimum(label, requiredNights);
+                    
+                    if (isValidCheckIn) {
+                        let totalRemainingDays = 0;
+                        
+                        // Count remaining days in current week
+                        for (let i = dayIdx + 1; i < days.length; i++) {
+                            if (classifyCell(days[i])) {
+                                totalRemainingDays++;
+                            } else {
+                                break;
+                            }
+                        }
+                        
+                        let remainingInCurrentWeek = totalRemainingDays;
+
+                        // Count days in all subsequent weeks in current month
+                        for (let wIdx = weekIndex + 1; wIdx < allWeeks.length; wIdx++) {
+                            const futureWeek = allWeeks[wIdx];
+                            const futureWeekDays = futureWeek.querySelectorAll('td');
+                            
+                            for (const cell of futureWeekDays) {
+                                if (classifyCell(cell)) {
+                                    totalRemainingDays++;
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Only include if checkout would be outside the current week
+                        if (requiredNights > remainingInCurrentWeek) {
+                            const needsNextMonth = requiredNights > totalRemainingDays;
+                            const requiredNightsFromNextWeek = needsNextMonth? requiredNights - totalRemainingDays : requiredNights - remainingInCurrentWeek;
+                            
+                            validCheckIns.push({
+                                checkInIndex: dayIdx,
+                                requiredNights: requiredNights,
+                                weekIndex: weekIndex,
+                                needsNextMonth: needsNextMonth,
+                                requiredNightsFromNextWeek: requiredNightsFromNextWeek
+                            });
+                        }
                     }
-
                 }
             }
             
@@ -519,8 +551,7 @@ async function checkCrossMonthNNight(tabId, currentMonth, nextMonth, nights) {
         args: [nights]
     });
     
-    const validCombinations = lastWeekCheckIns[0].result;
-    console.log('validCombinations:',validCombinations);
+    const validCombinations = lastWeeksCheckIns[0].result;
 
     if (!validCombinations || validCombinations.length === 0) {
         return combinations;
@@ -532,8 +563,7 @@ async function checkCrossMonthNNight(tabId, currentMonth, nextMonth, nights) {
             tabId, 
             currentMonth, 
             nextMonth, 
-            comb.checkInIndex, 
-            comb.requiredNights
+            comb
         );
         
         if (stayResult) {
@@ -548,63 +578,148 @@ async function checkCrossMonthNNight(tabId, currentMonth, nextMonth, nights) {
 }
 
 // Helper function for specific cross-month combinations
-async function trySpecificCrossMonthCombination(tabId, currentMonth, nextMonth, checkInIndex, nights) {
+async function trySpecificCrossMonthCombination(tabId, currentMonth, nextMonth, combData) {
     const checkInResult = await chrome.scripting.executeScript({
         target: { tabId },
-        func: (requiredNights, checkInIndex) => {
+        func: (checkInIndex, weekIdx) => {
             function findEnabledButton(cell) {
                 if (!cell) return null;
                 return (cell.getAttribute("role") === "button" && 
                        cell.getAttribute("aria-disabled") === "false") ? cell : null;
             }
 
-            function classifyCell(cell) {
-                if (!cell || !cell.hasAttribute("role")) return false;
-                if (cell.getAttribute("role") == "button") return true;
-            }
-
             const currentMonthContainer = document.querySelector('div._ytfarf[data-visible="true"]');
             const table = currentMonthContainer?.querySelector('table._cvkwaj');
             const allWeeks = table?.querySelectorAll('tbody tr');
 
-            if (!allWeeks?.length) return null;
+            if (!allWeeks?.length) return false;
 
-            const lastWeek = allWeeks[allWeeks.length - 1];
-            const days = lastWeek.querySelectorAll('td');
+            const targetWeek = allWeeks[weekIdx];
+            const days = targetWeek.querySelectorAll('td');
             
             const checkInBtn = findEnabledButton(days[checkInIndex]);
-            if (!checkInBtn) return null;
+            if (!checkInBtn) return false;
             
             checkInBtn.click();
-
-            // Count valid "buttons" after the check-in
-            let count = 0;
-            for (let i = checkInIndex + 1; i < days.length; i++) {
-                const classified = classifyCell(days[i]);
-
-                if (classified) {
-                    count++;
-                } else {
-                    break;
-                }
-            }
-            count = requiredNights - count;
-
-            return count;
+            return true;
         },
-        args: [nights, checkInIndex]
+        args: [combData.checkInIndex, combData.weekIndex]
     });
     
-    let requiredNightsLeft = 0;
-    if (!checkInResult[0].result) {
-        return null;
-    } else {
-        requiredNightsLeft = checkInResult[0].result;
+    if (!checkInResult[0].result) return null;
+    
+    // Find checkout in current month
+    if (!combData.needsNextMonth) {
+        const checkOutResult = await chrome.scripting.executeScript({
+            target: { tabId },
+            func: (weekIdx, requiredNightsFromNextWeek) => {
+                function extractDateRange() {
+                    const dateRangeElement = document.querySelector('[data-testid="availability-calendar-date-range"]');
+                    return dateRangeElement ? dateRangeElement.textContent.trim() : null;
+                }
+
+                function extractTotalPrice() {
+                    const priceSelectors = [
+                        'button span.umg93v9',
+                        'div[aria-hidden="true"] span.umg93v9',
+                        'span.umuerxh.atm_7l_dezgoh.atm_rd_us8791.atm_cs_1529pqs__oggzyc.atm_cs_kyjlp1__1v156lz'
+                    ];
+
+                    for (const selector of priceSelectors) {
+                        const el = document.querySelector(selector);
+                        if (el && el.textContent.includes('$')) {
+                            return el.textContent.trim();
+                        }
+                    }
+                    return null;
+                }
+
+                function findEnabledButton(cell) {
+                    if (!cell) return null;
+                    return (cell.getAttribute("role") === "button" && 
+                           cell.getAttribute("aria-disabled") === "false") ? cell : null;
+                }
+
+                function classifyCell(cell) {
+                    if (!cell || !cell.hasAttribute("role")) return false;
+                    if (cell.getAttribute("role") == "button") return true;
+                }
+
+                function waitForUIUpdate() {
+                    return new Promise((resolve) => {
+                        let attempts = 0;
+                        const maxAttempts = 20;
+                        
+                        const checkForData = () => {
+                            const dateRange = extractDateRange();
+                            const price = extractTotalPrice();
+                            
+                            if (dateRange && price) {
+                                resolve({ dateRange, totalPrice: price });
+                                return;
+                            }
+                            
+                            attempts++;
+                            if (attempts < maxAttempts) {
+                                setTimeout(checkForData, 100);
+                            } else {
+                                resolve(null);
+                            }
+                        };
+                        
+                        checkForData();
+                    });
+                }
+
+                return new Promise(async (resolve) => {
+                    const currentMonthContainer = document.querySelector('div._ytfarf[data-visible="true"]');
+                    const table = currentMonthContainer?.querySelector('table._cvkwaj');
+                    const allWeeks = table?.querySelectorAll('tbody tr');
+                    
+                    if (!currentMonthContainer || !table) {
+                        resolve('need_clear');
+                        return; 
+                    }
+
+                    const nextWeek = allWeeks[weekIdx + 1];
+                    if (!nextWeek) {
+                        resolve('need_clear');
+                        return;
+                    }
+
+                    const days = nextWeek.querySelectorAll('td');
+
+                    const checkOutBtn = findEnabledButton(days[requiredNightsFromNextWeek - 1]);
+                    if (!checkOutBtn) {
+                        resolve('need_clear');
+                        return;
+                    }
+
+                    checkOutBtn.click();
+                        
+                    const result = await waitForUIUpdate();
+                    if (result) {
+                        resolve(result);
+                    } else {
+                        resolve('need_clear');
+                    }
+                
+                });
+            },
+            args: [combData.weekIndex, combData.requiredNightsFromNextWeek]
+        });
+        
+        if (checkOutResult[0].result === 'need_clear') {
+            await clearSelectedDates(tabId);
+            return null;
+        }
+        
+        return checkOutResult[0].result;
     }
     
+    // Cases that need next month
     await navigateForwardToMonth(tabId, nextMonth);
     
-
     const checkOutResult = await chrome.scripting.executeScript({
         target: { tabId },
         func: (requiredNightsLeft) => { 
@@ -692,14 +807,14 @@ async function trySpecificCrossMonthCombination(tabId, currentMonth, nextMonth, 
 
                     if (!isClassified) continue;
 
-                    // Only count cells after the first classified cell
                     availableCount++;
 
-                    const btn = findEnabledButton(cell);
-
-                    if (availableCount === requiredNightsLeft && btn) {
-                        checkOutBtn = btn;
-                        break;
+                    if (availableCount === requiredNightsLeft) {
+                        const btn = findEnabledButton(cell);
+                        if (btn) {
+                            checkOutBtn = btn;
+                            break;
+                        }
                     }
                 }
 
@@ -718,7 +833,7 @@ async function trySpecificCrossMonthCombination(tabId, currentMonth, nextMonth, 
                 }
             });
         },
-        args: [requiredNightsLeft]
+        args: [combData.requiredNightsFromNextWeek]
     });
     
     // Navigate back to current month for next iteration
