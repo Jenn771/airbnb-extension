@@ -1,5 +1,3 @@
-console.log("Airbnb Extension is running");
-
 let desiredNights = 0;
 let searchParams = {};
 let allListings = [];
@@ -9,7 +7,6 @@ let flexibilityMode = 'respect';
 
 let processingQueue = [];
 let isProcessing = false;
-let maxConcurrent = 1;
 
 
 const DOM_SELECTORS = {
