@@ -3,7 +3,6 @@ console.log("Airbnb Extension is running");
 let desiredNights = 0;
 let searchParams = {};
 let allListings = [];
-let listingResults = new Map(); // Store calculated results by listing index
 let observer = null;
 let debounceTimer = null;
 let flexibilityMode = 'respect';
@@ -46,7 +45,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         
         console.log(`Received number of nights from popup: ${desiredNights}, flexibility: ${flexibilityMode}`);
 
-        listingResults.clear();
         initializeExtension();
         
     }
@@ -120,9 +118,6 @@ function handlePageChange() {
         alert("This extension does not support 'Monthly stays'.\nPlease choose 'Weekend' or 'Week' instead.");
         return;
     }
-
-    // Clear results
-    listingResults.clear();
     
     processAllListings();
 }
