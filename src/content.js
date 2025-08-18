@@ -328,7 +328,7 @@ function addFindBestDatesButton (listingData) {
     const existingButton = listingElement.querySelector(DOM_SELECTORS.BUTTON_CLASS);
     if (existingButton) {
         // Update existing button text in case nights changed
-        updateInitialButtonText(button);
+        updateInitialButtonText(existingButton);
         return;
     }
 
