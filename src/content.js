@@ -389,9 +389,10 @@ function createButton(listingData, listingIndex) {
 // Set initial button text
 function updateInitialButtonText(button) {
     if (button) {
-        button.innerText = `Find Best ${desiredNights}-Night Dates`;
+        button.innerText = `Check Best ${desiredNights}-Night Dates`;
         button.style.backgroundColor = '#0069A6';
         button.disabled = false;
+        button.title = "Opens the listing in a new tab to automatically check its calendar (tab remains focused).";
     }
 }
 
