@@ -18,7 +18,7 @@ body {
 .logo {
     font-size: 18px;
     font-weight: 700;
-    color: #FF385C;
+    color: #0069A6;
     margin-bottom: 4px;
 }
 
@@ -78,14 +78,14 @@ body {
 
 .radio-option:hover {
     background: #f8f9fa;
-    border-color: #FF385C;
+    border-color: #0069A6;
 }
 
 .radio-option input[type="radio"] {
     width: 16px;
     height: 16px;
     margin: 0;
-    accent-color: #FF385C;
+    accent-color: #0069A6;
     cursor: pointer;
 }
 
@@ -142,7 +142,7 @@ input {
 
 input:focus {
     outline: none;
-    border-color: #FF385C;
+    border-color: #0069A6;
     box-shadow: 0 0 0 1px rgba(255, 56, 92, 0.1);
 }
 
@@ -154,7 +154,7 @@ input::placeholder {
 /* Button */
 button {
     width: 100%;
-    background: #FF385C;
+    background: #0069A6;
     color: white;
     border: none;
     border-radius: 8px;
@@ -166,7 +166,7 @@ button {
 }
 
 button:hover {
-    background: #e31c5f;
+    background: #005385;
 }
 
 button:disabled {
