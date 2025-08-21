@@ -27,6 +27,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 originalTab = currentTab;
 
                 await chrome.tabs.update(tab.id, { active: true });
+                // Wait for page to load before processing
                 await new Promise(resolve => setTimeout(resolve, 3500));
 
                 const results = await processListingCalendar(tab.id, message);
@@ -80,7 +81,6 @@ async function ensureTabActive(tabId) {
     }
 }
 
-// Helper function to remove year from date range
 function removeYearFromDateRange(dateRange) {
     if (!dateRange) return dateRange;
     
@@ -91,13 +91,11 @@ function parsePrice(priceString) {
     return parseFloat(priceString.replace(/[$,]/g, ''));
 }
 
-// Helper function to find cheapest combination
 function findCheapestCombination(combinations) {
     if (!combinations || combinations.length === 0) {
         return { bestDates: null, bestPrice: null, hasError: false };
     }
 
-    // Sort by price
     const sortedCombinations = combinations.sort((a, b) => {
         const priceA = parsePrice(a.totalPrice);
         const priceB = parsePrice(b.totalPrice);
@@ -114,12 +112,9 @@ function findCheapestCombination(combinations) {
 async function processListingCalendar(tabId, message) {
     try {
         await ensureTabActive(tabId);
-
         await clearSelectedDates(tabId);
-
         await navigateToFirstTargetMonth(tabId, message.months);
         
-        // Check flexibility constraints
         if (message.mode === "respect") {
             if (message.tripLength.includes("weekend_trip")) {
                 const weekendResults = await findWeekendCombinations(tabId, message.months);
@@ -154,53 +149,41 @@ async function processListingCalendar(tabId, message) {
 async function navigateToFirstTargetMonth(tabId, targetMonths) {
     await ensureTabActive(tabId);
 
-    // Get current month on calendar
     const currentCalendarMonth = await getCurrentMonth(tabId);  
-    const currentCalendarMonthName = currentCalendarMonth.split(' ')[0].toLowerCase(); // e.g., extract month from "October 2025" 
-    const currentCalendarYear = parseInt(currentCalendarMonth.split(' ')[1]); // e.g., extract year from "October 2025"
-    console.log(`Current month on calendar: ${currentCalendarMonthName} ${currentCalendarYear}`);
+    const currentCalendarMonthName = currentCalendarMonth.split(' ')[0].toLowerCase();
+    const currentCalendarYear = parseInt(currentCalendarMonth.split(' ')[1]);
     
     const firstTargetMonth = targetMonths[0];
 
     // Return if the calendar is already in the first target month
     if (firstTargetMonth === currentCalendarMonthName) {
-        console.log(`Already at target month: ${currentCalendarMonthName}`);
         return currentCalendarMonthName;
     }
     
-    // Get month indicie
     const currentCalendarMonthIndex = getMonthIndex(currentCalendarMonthName); 
     const targetMonthIndex = getMonthIndex(firstTargetMonth); 
     
-
-    // Get current real world date for year calculation
     const currentDate = new Date();
     const currentRealYear = currentDate.getFullYear();
     const currentRealMonthIndex = currentDate.getMonth();
     
-
     // If target month is before current real month, it's likely next year
     let targetYear = currentRealYear;
-
     if (targetMonthIndex < currentRealMonthIndex) {
         targetYear = currentRealYear + 1;
     }
 
-    // Calculate if we need to navigate forward or backward
+    // Calculate navigation direction based on chronological comparison
     const currentCalendarDate = new Date(currentCalendarYear, currentCalendarMonthIndex, 1);
     const targetDate = new Date(targetYear, targetMonthIndex, 1);
-
 
     let navigatedMonth;
     
     if (targetDate > currentCalendarDate) {
-        // Navigate forward
         navigatedMonth = await navigateForwardToMonth(tabId, firstTargetMonth);
     } else {
-        // Navigate backward  
         navigatedMonth = await navigateBackwardToMonth(tabId, firstTargetMonth);
     }
     
-    console.log(`Successfully navigated to: ${navigatedMonth}`);
     return navigatedMonth;
 }
