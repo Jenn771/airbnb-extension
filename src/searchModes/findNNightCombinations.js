@@ -6,19 +6,15 @@ export async function findNNightCombinations(tabId, months, nights) {
     for (let monthIdx = 0; monthIdx < months.length; monthIdx++) {
         const currentMonth = months[monthIdx];
         
-        // Navigate to current month (should already be there for first month)
         if (monthIdx > 0) {
             await navigateForwardToMonth(tabId, currentMonth);
         }
         
-        // Check if next month is consecutive and in the list
+        // Check if next month is consecutive, needed for cross-month validation
         const nextMonth = months[monthIdx + 1];
         const isNextMonthConsecutive = nextMonth && 
             getMonthIndex(nextMonth) === (getMonthIndex(currentMonth) + 1) % 12;
         
-        console.log(`Next month: ${nextMonth}, Consecutive: ${isNextMonthConsecutive}`);
-        
-        // Process current month for N-night stays
         const monthCombinations = await processMonthNNights(
             tabId, 
             currentMonth, 
@@ -36,7 +32,6 @@ export async function findNNightCombinations(tabId, months, nights) {
 async function processMonthNNights(tabId, currentMonth, nextMonth, canCheckNextMonth, nights) {
     const combinations = [];
 
-    // Get week count for current month
     const monthData = await chrome.scripting.executeScript({
         target: { tabId },
         func: () => {
@@ -60,11 +55,7 @@ async function processMonthNNights(tabId, currentMonth, nextMonth, canCheckNextM
         throw new Error(`No weeks found for month ${currentMonth}`);
     }
     
-    // Process each week in current month
     for (let weekIdx = 0; weekIdx < weekCount; weekIdx++) {
-        console.log(`Processing week ${weekIdx + 1} of ${weekCount}`);
-        
-        // Check regular week combinations
         const regularWeek = await checkRegularWeek(tabId, weekIdx, nights, weekCount, canCheckNextMonth);
 
         if (regularWeek && regularWeek.length > 0) {
@@ -72,9 +63,8 @@ async function processMonthNNights(tabId, currentMonth, nextMonth, canCheckNextM
         }
     }
 
-    // Check cross-month N-night stays (only if next month is consecutive)
+    // Check cross-month combinations only for consecutive months
     if (canCheckNextMonth) {
-        console.log(`Checking cross-month ${nights}-night stays from ${currentMonth} to ${nextMonth}`);
         const crossMonthStays = await checkCrossMonthNNight(tabId, currentMonth, nextMonth, nights);
         if (crossMonthStays && crossMonthStays.length > 0) {
             combinations.push(...crossMonthStays);
@@ -84,11 +74,9 @@ async function processMonthNNights(tabId, currentMonth, nextMonth, canCheckNextM
     return combinations;
 }
 
-// Check regular week combinations (same week and cross-week within same month)
 async function checkRegularWeek(tabId, weekIdx, nights, totalWeeks, canCheckNextMonth) {
     const combinations = [];
     
-    // Get all possible starting positions for this week
     const possibleStarts = await chrome.scripting.executeScript({
         target: { tabId },
         func: (weekIndex, requiredNights, totalWeekCount, canCheckNextMonth) => {
@@ -120,13 +108,12 @@ async function checkRegularWeek(tabId, weekIdx, nights, totalWeeks, canCheckNext
             
             const currentDays = currentWeek.querySelectorAll('td');
             
-            // Get all day buttons for the current week
             const currentWeekButtons = [];
             for (let i = 0; i < 7; i++) {
                 currentWeekButtons.push(findEnabledButton(currentDays[i]));
             }
 
-            // Get next week buttons if it exists (for cross-week combinations within same month)
+            // Get next week buttons for cross-week combinations within same month
             const nextWeek = allWeeks[weekIndex + 1];
             const nextWeekButtons = [];
             if (nextWeek) {
@@ -136,10 +123,8 @@ async function checkRegularWeek(tabId, weekIdx, nights, totalWeeks, canCheckNext
                 }
             }
 
-            // Combine all available buttons (current week + next week if available)
             const allButtons = [...currentWeekButtons, ...nextWeekButtons];
 
-            // Find ALL valid check-in/check-out combinations
             const validCombinations = [];
             
             for (let dayIdx = 0; dayIdx < currentWeekButtons.length; dayIdx++) {
@@ -158,7 +143,7 @@ async function checkRegularWeek(tabId, weekIdx, nights, totalWeeks, canCheckNext
                         const isCurrentWeekCombo = checkOutIndex < currentWeekButtons.length;
                         const isCrossWeekCombo = checkOutIndex >= currentWeekButtons.length && nextWeek;
                         
-                        // Skip cross-week combinations for the last two weeks 
+                        // Skip cross-week combinations for the last two weeks to avoid conflicts
                         if (isCrossWeekCombo && 
                             (weekIndex === totalWeekCount - 1 || 
                             (weekIndex === totalWeekCount - 2 && canCheckNextMonth))) {
@@ -186,8 +171,6 @@ async function checkRegularWeek(tabId, weekIdx, nights, totalWeeks, canCheckNext
     if (!validCombinations || validCombinations.length === 0) {
         return combinations;
     }
-
-    console.log(`Found ${validCombinations.length} potential ${nights}-night combinations in week ${weekIdx + 1}`);
 
     for (const combo of validCombinations) {
         let stayResult;
@@ -219,7 +202,6 @@ async function checkRegularWeek(tabId, weekIdx, nights, totalWeeks, canCheckNext
     }
 
     await clearSelectedDates(tabId);
-
     return combinations;
 }
 
@@ -310,6 +292,7 @@ async function checkSameWeekCombination(tabId, weekIdx, checkInIndex, checkOutIn
                     return;
                 }
 
+                // Small delay for UI state transition before selecting check-out
                 setTimeout(() => {
                     checkOutBtn.click();
                     
@@ -451,7 +434,7 @@ async function checkCrossWeekCombination(tabId, checkInWeekIdx, checkInDayIdx, c
 async function checkCrossMonthNNight(tabId, currentMonth, nextMonth, nights) {
     const combinations = [];
     
-    // Get all valid check-in days from the last two weeks
+    // Find valid check-in days from last two weeks that require cross-month checkout
     const lastWeeksCheckIns = await chrome.scripting.executeScript({
         target: { tabId },
         func: (requiredNights) => {
@@ -558,7 +541,6 @@ async function checkCrossMonthNNight(tabId, currentMonth, nextMonth, nights) {
     }
     
     for (const comb of validCombinations) {
-        
         const stayResult = await trySpecificCrossMonthCombination(
             tabId, 
             currentMonth, 
@@ -577,7 +559,6 @@ async function checkCrossMonthNNight(tabId, currentMonth, nextMonth, nights) {
     return combinations;
 }
 
-// Helper function for specific cross-month combinations
 async function trySpecificCrossMonthCombination(tabId, currentMonth, nextMonth, combData) {
     const checkInResult = await chrome.scripting.executeScript({
         target: { tabId },
@@ -608,7 +589,7 @@ async function trySpecificCrossMonthCombination(tabId, currentMonth, nextMonth, 
     
     if (!checkInResult[0].result) return null;
     
-    // Find checkout in current month
+    // Handle checkout within current month
     if (!combData.needsNextMonth) {
         const checkOutResult = await chrome.scripting.executeScript({
             target: { tabId },
@@ -703,7 +684,6 @@ async function trySpecificCrossMonthCombination(tabId, currentMonth, nextMonth, 
                     } else {
                         resolve('need_clear');
                     }
-                
                 });
             },
             args: [combData.weekIndex, combData.requiredNightsFromNextWeek]
@@ -717,7 +697,7 @@ async function trySpecificCrossMonthCombination(tabId, currentMonth, nextMonth, 
         return checkOutResult[0].result;
     }
     
-    // Cases that need next month
+    // Handle checkout in next month
     await navigateForwardToMonth(tabId, nextMonth);
     
     const checkOutResult = await chrome.scripting.executeScript({
@@ -802,6 +782,7 @@ async function trySpecificCrossMonthCombination(tabId, currentMonth, nextMonth, 
                 let availableCount = 0;
                 let checkOutBtn = null;
 
+                // Find the Nth available day for checkout
                 for (const cell of allDays) {
                     const isClassified = classifyCell(cell);
 
@@ -836,7 +817,7 @@ async function trySpecificCrossMonthCombination(tabId, currentMonth, nextMonth, 
         args: [combData.requiredNightsFromNextWeek]
     });
     
-    // Navigate back to current month for next iteration
+    // Navigate back for next iteration
     await navigateBackwardToMonth(tabId, currentMonth);
     
     if (checkOutResult[0].result === 'need_clear') {
