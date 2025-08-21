@@ -6,7 +6,6 @@ export async function findWeekCombinations(tabId, months) {
     for (let monthIdx = 0; monthIdx < months.length; monthIdx++) {
         const currentMonth = months[monthIdx];
         
-        // Navigate to current month (should already be there for first month)
         if (monthIdx > 0) {
             await navigateForwardToMonth(tabId, currentMonth);
         }
@@ -16,9 +15,6 @@ export async function findWeekCombinations(tabId, months) {
         const isNextMonthConsecutive = nextMonth && 
             getMonthIndex(nextMonth) === (getMonthIndex(currentMonth) + 1) % 12;
         
-        console.log(`Next month: ${nextMonth}, Consecutive: ${isNextMonthConsecutive}`);
-        
-        // Process current month weeks
         const monthCombinations = await processMonthWeeks(
             tabId, 
             currentMonth, 
@@ -36,7 +32,6 @@ async function processMonthWeeks(tabId, currentMonth, nextMonth, canCheckNextMon
     const combinations = [];
     let checkCrossMonth = true;
 
-    // Get week count for current month
     const monthData = await chrome.scripting.executeScript({
         target: { tabId },
         func: () => {
@@ -60,23 +55,19 @@ async function processMonthWeeks(tabId, currentMonth, nextMonth, canCheckNextMon
         throw new Error(`No weeks found for month ${currentMonth}`);
     }
     
-    // Process each week in current month
     for (let weekIdx = 0; weekIdx < weekCount; weekIdx++) {
-        console.log(`Processing week ${weekIdx + 1} of ${weekCount}`);
-        
-        // Check regular week (Sunday-Friday within same month)
         const regularWeek = await checkRegularWeek(tabId, weekIdx);
 
         if (regularWeek) {
+            // Prevent cross-month check if last week has valid regular week
             if (weekIdx === weekCount - 1) {
                 checkCrossMonth = false;
             }
             combinations.push(regularWeek);
         }
 
-        // Check cross-month week (only for last week if next month is consecutive)
+        // Only check cross-month for last week of consecutive months
         if (weekIdx === weekCount - 1 && canCheckNextMonth && checkCrossMonth) {
-            console.log(`Checking cross-month week from ${currentMonth} to ${nextMonth}`);
             const crossMonthWeek = await checkCrossMonthWeek(tabId, nextMonth);
             if (crossMonthWeek) {
                 combinations.push(crossMonthWeek);
@@ -91,7 +82,6 @@ async function checkRegularWeek(tabId, weekIdx) {
     const result = await chrome.scripting.executeScript({
         target: { tabId },
         func: (weekIndex) => {
-            // Helper functions
             function hasInvalidMinimum(label) {
                 const match = label.match(/(\d+)\s+night minimum/i);
                 if (!match) return false;
@@ -101,7 +91,7 @@ async function checkRegularWeek(tabId, weekIdx) {
 
             function extractDateRange() {
                 const dateRangeElement = document.querySelector('[data-testid="availability-calendar-date-range"]');
-                return dateRangeElement ? dateRangeElement.textContent.trim() : null; // e.g., "Sep 19, 2025 - Sep 21, 2025"
+                return dateRangeElement ? dateRangeElement.textContent.trim() : null;
             }
 
             function extractTotalPrice() {
@@ -122,11 +112,11 @@ async function checkRegularWeek(tabId, weekIdx) {
 
             function findEnabledButton(cell) {
                 if (!cell) return null;
-
+                
                 if (cell.getAttribute("role") === "button" && cell.getAttribute("aria-disabled") === "false") {
                     return cell;
                 }
-
+                
                 return null;
             }
 
@@ -166,7 +156,6 @@ async function checkRegularWeek(tabId, weekIdx) {
                 }
 
                 const currentWeek = allWeeks[weekIndex];
-                
                 const currentDays = currentWeek.querySelectorAll('td');
                 
                 const sundayBtn = findEnabledButton(currentDays[0]);
@@ -176,14 +165,11 @@ async function checkRegularWeek(tabId, weekIdx) {
                 const thursdayBtn = findEnabledButton(currentDays[4]);
                 const fridayBtn = findEnabledButton(currentDays[5]);
 
-
                 if (!sundayBtn || !mondayBtn || !tuesdayBtn || !wednesdayBtn || !thursdayBtn || !fridayBtn) {
-                    console.log("Missing one of the week buttons");
                     resolve(null);
                     return;
                 }
 
-                // Check Sunday conditions
                 const sundayLabel = sundayBtn.getAttribute("aria-label") || "";
                 const isSundayValid = sundayLabel.includes("check-in") && 
                                     !hasInvalidMinimum(sundayLabel);
@@ -193,19 +179,16 @@ async function checkRegularWeek(tabId, weekIdx) {
                     return;
                 }
 
-                // Click Sunday (check-in) and Friday (check-out)
                 sundayBtn.click();
                 
+                // Small delay for UI state transition before selecting check-out
                 setTimeout(() => {
                     fridayBtn.click();
                     
-                    // Wait for UI to update with pricing information
                     waitForUIUpdate((result) => {
                         if (result) {
-                            console.log("Found regular week:", result.dateRange, result.totalPrice);
                             resolve(result);
                         } else {
-                            console.log("No price/date data found after selection");
                             resolve('need_clear');
                         }
                     });
@@ -224,11 +207,9 @@ async function checkRegularWeek(tabId, weekIdx) {
 }
 
 async function checkCrossMonthWeek(tabId, nextMonth) {
-    // Get Sunday from current month's last week
     const sundayResult = await chrome.scripting.executeScript({
         target: { tabId },
         func: () => {
-            // Helper Functions
             function hasInvalidMinimum(label) {
                 const match = label.match(/(\d+)\s+night minimum/i);
                 if (!match) return false;
@@ -254,19 +235,16 @@ async function checkCrossMonthWeek(tabId, nextMonth) {
 
             const lastWeek = allWeeks[allWeeks.length - 1];
             const days = lastWeek.querySelectorAll('td');
-
             const sundayBtn = findEnabledButton(days[0]);
             
             if (!sundayBtn) return null;
             
-            // Check Sunday conditions
             const sundayLabel = sundayBtn.getAttribute("aria-label") || "";
             const isSundayValid = sundayLabel.includes("check-in") && 
                                 !hasInvalidMinimum(sundayLabel);
             
             if (!isSundayValid) return null;
             
-
             sundayBtn.click();
             return 'sunday_clicked';
         }
@@ -274,17 +252,14 @@ async function checkCrossMonthWeek(tabId, nextMonth) {
     
     if (!sundayResult[0].result) return null;
     
-    // Navigate to next month
     await navigateForwardToMonth(tabId, nextMonth);
     
-    // Click Friday in first week of next month
     const fridayResult = await chrome.scripting.executeScript({
         target: { tabId },
         func: () => {
-            // Helper Functions
             function extractDateRange() {
                 const dateRangeElement = document.querySelector('[data-testid="availability-calendar-date-range"]');
-                return dateRangeElement ? dateRangeElement.textContent.trim() : null; // e.g., "Sep 19, 2025 - Sep 21, 2025"
+                return dateRangeElement ? dateRangeElement.textContent.trim() : null;
             }
 
             function extractTotalPrice() {
@@ -361,10 +336,8 @@ async function checkCrossMonthWeek(tabId, nextMonth) {
                 
                 waitForUIUpdate((result) => {
                     if (result) {
-                        console.log("Found cross-month week:", result.dateRange, result.totalPrice);
                         resolve(result);
                     } else {
-                        console.log("No cross-month price/date data found");
                         resolve('need_clear');
                     }
                 });
