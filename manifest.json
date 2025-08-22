@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Airbnb Date Price Scanner",
+    "name": "Airbnb Best Dates Finder",
     "version": "1.0.0",
     "description": "Scans Airbnb listings for best price combinations",
     "icons": {
