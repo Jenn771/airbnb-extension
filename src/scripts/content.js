@@ -31,6 +31,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             return;
         }
 
+        if (message.flexibility === 'respect' && tripLengths.length === 0) {
+            alert(
+                "Airbnb did not update the trip length correctly.\n" +
+                "Please close this tab and reopen your search page with Flexible dates."
+            );
+            return;
+        }
+
         if (desiredNights === message.nights && flexibilityMode === message.flexibility) {
             return;
         }
@@ -98,6 +106,14 @@ function handlePageChange() {
     const tripLengths = searchParams.flexible_trip_lengths || [];
     if (tripLengths.includes("one_month")) {
         alert("This extension does not support 'Monthly stays'.\nPlease choose 'Weekend' or 'Week' instead.");
+        return;
+    }
+
+    if (flexibilityMode === 'respect' && tripLengths.length === 0) {
+        alert(
+            "Airbnb did not update the trip length correctly.\n" +
+            "Please close this tab and reopen your search page with Flexible dates."
+        );
         return;
     }
     
