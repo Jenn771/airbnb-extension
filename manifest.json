@@ -1,23 +1,36 @@
 {
-    "manifest_version": 3,
-    "name": "Airbnb Date Price Scanner",
-    "version": "1.0.0",
-    "description": "Scans Airbnb listings for best price combinations",
-    "icons": {
-        "128": "assets/icon128.png"
-    },
-    "permissions": ["scripting", "tabs", "storage"],
-    "host_permissions": ["https://www.airbnb.com/*"],
-    "action": {
-        "default_popup": "src/popup.html",
-        "default_icon": {
-        "128": "assets/icon128.png"
-        }
-    },
-    "content_scripts": [
-    {
-        "matches": ["https://www.airbnb.com/*"],
-        "js": ["src/content.js"]
+  "manifest_version": 3,
+  "name": "Airbnb Best Dates Finder",
+  "version": "1.0.0",
+  "description": "Scans Airbnb listings for best price combinations",
+
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+
+  "permissions": ["scripting", "tabs", "storage"],
+  "host_permissions": ["https://www.airbnb.com/*"],
+
+  "background": {
+    "service_worker": "src/scripts/background.js",
+    "type": "module"
+  },
+
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
     }
-    ]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://www.airbnb.com/*"],
+      "js": ["src/scripts/content.js"]
+    }
+  ]
 }
