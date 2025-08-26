@@ -13,7 +13,7 @@ This extension solves the tedious process of manually checking each Airbnb listi
 - **Flexible date optimization** - Works with Airbnb's "Weekend" and "Week" filters or custom night counts
 - **Queue processing** - Handles multiple listings one at a time with controlled tab management
 - **Real-time UI synchronization** - Buttons adapt to filter changes, window resizing, and pagination
-- **MutationObserver + debounce** - Efficiently detects Airbnb's React-based DOM changes
+- **MutationObserver + debounce** - Detects Airbnb's React-based DOM changes
 - **User feedback** - Buttons update with statuses (`Queued`, `Processing`, `Best Price`, `Error`)
 - **Month detection** - Determines target months from Airbnb UI or defaults to next 3 months
 
