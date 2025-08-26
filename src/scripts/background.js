@@ -1,5 +1,5 @@
 import { clearSelectedDates, getCurrentMonth, navigateForwardToMonth, navigateBackwardToMonth, getMonthIndex } from './helpers/calendarHelpers.js';
-import { findWeekendCombinations, findWeekCombinations, findNNightCombinations } from './searchModes/index.js';
+import { findWeekendCombinations, findWeekCombinations, findNNightCombinations } from '../searchModes/index.js';
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "OPEN_LISTING_TAB") {

@@ -1,4 +1,4 @@
-import { clearSelectedDates, navigateForwardToMonth, navigateBackwardToMonth, getMonthIndex } from '../helpers/calendarHelpers.js';
+import { clearSelectedDates, navigateForwardToMonth, navigateBackwardToMonth, getMonthIndex } from '../scripts/helpers/calendarHelpers.js';
 
 export async function findNNightCombinations(tabId, months, nights) {
     const combinations = [];

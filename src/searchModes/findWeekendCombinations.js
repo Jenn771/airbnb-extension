@@ -1,4 +1,4 @@
-import { clearSelectedDates, navigateForwardToMonth, getMonthIndex } from '../helpers/calendarHelpers.js';
+import { clearSelectedDates, navigateForwardToMonth, getMonthIndex } from '../scripts/helpers/calendarHelpers.js';
 
 export async function findWeekendCombinations(tabId, months) {
     const combinations = [];

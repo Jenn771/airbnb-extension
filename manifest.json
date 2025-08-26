@@ -14,12 +14,12 @@
   "host_permissions": ["https://www.airbnb.com/*"],
 
   "background": {
-    "service_worker": "src/background.js",
+    "service_worker": "src/scripts/background.js",
     "type": "module"
   },
 
   "action": {
-    "default_popup": "src/popup.html",
+    "default_popup": "src/popup/popup.html",
     "default_icon": {
       "16": "assets/icon16.png",
       "48": "assets/icon48.png",
@@ -30,7 +30,7 @@
   "content_scripts": [
     {
       "matches": ["https://www.airbnb.com/*"],
-      "js": ["src/content.js"]
+      "js": ["src/scripts/content.js"]
     }
   ]
 }
