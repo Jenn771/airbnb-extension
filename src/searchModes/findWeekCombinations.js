@@ -95,18 +95,27 @@ async function checkRegularWeek(tabId, weekIdx) {
             }
 
             function extractTotalPrice() {
-                const priceSelectors = [
-                    'button span.umg93v9',
-                    'div[aria-hidden="true"] span.umg93v9',
-                    'span.umuerxh.atm_7l_dezgoh.atm_rd_us8791.atm_cs_1529pqs__oggzyc.atm_cs_kyjlp1__1v156lz'
-                ];
-
-                for (const selector of priceSelectors) {
-                    const el = document.querySelector(selector);
-                    if (el && el.textContent.includes('$')) {
-                        return el.textContent.trim();
+                // Large screen - iterate spans inside the price button rather than targeting
+                // a specific class, since Airbnb uses different span classes for regular
+                // vs discounted pricing layouts
+                const priceButton = document.querySelector('button[aria-haspopup="dialog"]');
+                if (priceButton) {
+                    const spans = priceButton.querySelectorAll('span');
+                    for (const span of spans) {
+                        const text = span.textContent.trim();
+                        if (text.startsWith('$') && /\$[\d,]+/.test(text)) {
+                            return text;
+                        }
                     }
                 }
+
+                // Small screen - button aria-label contains the total
+                const labelButton = document.querySelector('button[aria-label*="for"][aria-label*="night"]');
+                if (labelButton) {
+                    const match = labelButton.getAttribute('aria-label').match(/\$[\d,]+/);
+                    if (match) return match[0];
+                }
+
                 return null;
             }
 
@@ -265,18 +274,25 @@ async function checkCrossMonthWeek(tabId, nextMonth) {
             }
 
             function extractTotalPrice() {
-                const priceSelectors = [
-                    'button span.umg93v9',
-                    'div[aria-hidden="true"] span.umg93v9',
-                    'span.umuerxh.atm_7l_dezgoh.atm_rd_us8791.atm_cs_1529pqs__oggzyc.atm_cs_kyjlp1__1v156lz'
-                ];
-
-                for (const selector of priceSelectors) {
-                    const el = document.querySelector(selector);
-                    if (el && el.textContent.includes('$')) {
-                        return el.textContent.trim();
+                // Large screen
+                const priceButton = document.querySelector('button[aria-haspopup="dialog"]');
+                if (priceButton) {
+                    const spans = priceButton.querySelectorAll('span');
+                    for (const span of spans) {
+                        const text = span.textContent.trim();
+                        if (text.startsWith('$') && /\$[\d,]+/.test(text)) {
+                            return text;
+                        }
                     }
                 }
+
+                // Small screen
+                const labelButton = document.querySelector('button[aria-label*="for"][aria-label*="night"]');
+                if (labelButton) {
+                    const match = labelButton.getAttribute('aria-label').match(/\$[\d,]+/);
+                    if (match) return match[0];
+                }
+
                 return null;
             }
 
