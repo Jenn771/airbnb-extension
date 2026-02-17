@@ -159,13 +159,8 @@ async function checkRegularWeek(tabId, weekIdx) {
                 const currentDays = currentWeek.querySelectorAll('td');
                 
                 const sundayBtn = findEnabledButton(currentDays[0]);
-                const mondayBtn = findEnabledButton(currentDays[1]);
-                const tuesdayBtn = findEnabledButton(currentDays[2]);
-                const wednesdayBtn = findEnabledButton(currentDays[3]);
-                const thursdayBtn = findEnabledButton(currentDays[4]);
-                const fridayBtn = findEnabledButton(currentDays[5]);
 
-                if (!sundayBtn || !mondayBtn || !tuesdayBtn || !wednesdayBtn || !thursdayBtn || !fridayBtn) {
+                if (!sundayBtn) {
                     resolve(null);
                     return;
                 }
@@ -183,6 +178,13 @@ async function checkRegularWeek(tabId, weekIdx) {
                 
                 // Small delay for UI state transition before selecting check-out
                 setTimeout(() => {
+                    const fridayBtn = findEnabledButton(currentDays[5]);
+
+                    if (!fridayBtn) {
+                        resolve('need_clear');
+                        return;
+                    }
+
                     fridayBtn.click();
                     
                     waitForUIUpdate((result) => {
