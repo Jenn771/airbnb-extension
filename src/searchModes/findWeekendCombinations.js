@@ -90,18 +90,25 @@ async function checkRegularWeekend(tabId, weekIdx) {
             }
 
             function extractTotalPrice() {
-                const priceSelectors = [
-                    'button span.umg93v9',
-                    'div[aria-hidden="true"] span.umg93v9',
-                    'span.umuerxh.atm_7l_dezgoh.atm_rd_us8791.atm_cs_1529pqs__oggzyc.atm_cs_kyjlp1__1v156lz'
-                ];
-
-                for (const selector of priceSelectors) {
-                    const el = document.querySelector(selector);
-                    if (el && el.textContent.includes('$')) {
-                        return el.textContent.trim();
+                // iterate spans inside the price button
+                const priceButton = document.querySelector('button[aria-haspopup="dialog"]');
+                if (priceButton) {
+                    const spans = priceButton.querySelectorAll('span');
+                    for (const span of spans) {
+                        const text = span.textContent.trim();
+                        if (text.startsWith('$') && /\$[\d,]+/.test(text)) {
+                            return text;
+                        }
                     }
                 }
+
+                // button aria-label contains the total
+                const labelButton = document.querySelector('button[aria-label*="for"][aria-label*="night"]');
+                if (labelButton) {
+                    const match = labelButton.getAttribute('aria-label').match(/\$[\d,]+/);
+                    if (match) return match[0];
+                    }
+
                 return null;
             }
 
@@ -262,18 +269,25 @@ async function checkCrossMonthWeekend(tabId, nextMonth) {
             }
 
             function extractTotalPrice() {
-                const priceSelectors = [
-                    'button span.umg93v9',
-                    'div[aria-hidden="true"] span.umg93v9',
-                    'span.umuerxh.atm_7l_dezgoh.atm_rd_us8791.atm_cs_1529pqs__oggzyc.atm_cs_kyjlp1__1v156lz'
-                ];
-
-                for (const selector of priceSelectors) {
-                    const el = document.querySelector(selector);
-                    if (el && el.textContent.includes('$')) {
-                        return el.textContent.trim();
+                // iterate spans inside the price button
+                const priceButton = document.querySelector('button[aria-haspopup="dialog"]');
+                if (priceButton) {
+                    const spans = priceButton.querySelectorAll('span');
+                    for (const span of spans) {
+                        const text = span.textContent.trim();
+                        if (text.startsWith('$') && /\$[\d,]+/.test(text)) {
+                            return text;
+                        }
                     }
                 }
+
+                // button aria-label contains the total
+                const labelButton = document.querySelector('button[aria-label*="for"][aria-label*="night"]');
+                if (labelButton) {
+                    const match = labelButton.getAttribute('aria-label').match(/\$[\d,]+/);
+                    if (match) return match[0];
+                    }
+
                 return null;
             }
 
