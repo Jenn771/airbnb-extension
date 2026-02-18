@@ -326,6 +326,8 @@ async function checkCrossMonthWeekend(tabId, nextMonth) {
                 checkForData();
             }
 
+            // If the cross month starts on a day thats not sunday, the first week's Sunday column
+            // is blank and the actual first Sunday is in the second week
             return new Promise((resolve) => {
                 const currentMonthContainer = document.querySelector('div._ytfarf[data-visible="true"]');
                 const table = currentMonthContainer?.querySelector('table._cvkwaj');
@@ -337,8 +339,21 @@ async function checkCrossMonthWeekend(tabId, nextMonth) {
                 }
 
                 const firstWeek = allWeeks[0];
-                const days = firstWeek.querySelectorAll('td');
-                const sundayBtn = findEnabledButton(days[0]);
+                const firstWeekDays = firstWeek.querySelectorAll('td');
+                const firstSundayCell = firstWeekDays[0];
+
+                // Only fall back to week 2 if the Sunday cell is genuinely blank
+                // (no role="button"), not just unavailable
+                const isBlankCell = firstSundayCell?.getAttribute("role") !== "button";
+
+                const sundayBtn = isBlankCell
+                    ? (() => {
+                        const secondWeek = allWeeks[1];
+                        if (!secondWeek) return null;
+                        const secondWeekDays = secondWeek.querySelectorAll('td');
+                        return findEnabledButton(secondWeekDays[0]);
+                    })()
+                    : findEnabledButton(firstSundayCell);
 
                 if (!sundayBtn) {
                     resolve('need_clear');
