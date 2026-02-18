@@ -240,9 +240,8 @@ async function checkCrossMonthWeekend(tabId, nextMonth) {
             const days = lastWeek.querySelectorAll('td');
 
             const fridayBtn = findEnabledButton(days[5]);
-            const saturdayBtn = findEnabledButton(days[6]);
             
-            if (!fridayBtn || !saturdayBtn) return null;
+            if (!fridayBtn) return null;
             
             // Check Friday conditions for valid check-in
             const fridayLabel = fridayBtn.getAttribute("aria-label") || "";
