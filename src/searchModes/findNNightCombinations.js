@@ -232,7 +232,7 @@ async function checkSameWeekCombination(tabId, weekIdx, checkInIndex, checkOutIn
                 if (labelButton) {
                     const match = labelButton.getAttribute('aria-label').match(/\$[\d,]+/);
                     if (match) return match[0];
-                    }
+                }
 
                 return null;
             }
@@ -351,7 +351,7 @@ async function checkCrossWeekCombination(tabId, checkInWeekIdx, checkInDayIdx, c
                 if (labelButton) {
                     const match = labelButton.getAttribute('aria-label').match(/\$[\d,]+/);
                     if (match) return match[0];
-                    }
+                }
 
                 return null;
             }
@@ -614,24 +614,24 @@ async function trySpecificCrossMonthCombination(tabId, currentMonth, nextMonth, 
                 }
 
                 function extractTotalPrice() {
-                // iterate spans inside the price button
-                const priceButton = document.querySelector('button[aria-haspopup="dialog"]');
-                if (priceButton) {
-                    const spans = priceButton.querySelectorAll('span');
-                    for (const span of spans) {
-                        const text = span.textContent.trim();
-                        if (text.startsWith('$') && /\$[\d,]+/.test(text)) {
-                            return text;
+                    // iterate spans inside the price button
+                    const priceButton = document.querySelector('button[aria-haspopup="dialog"]');
+                    if (priceButton) {
+                        const spans = priceButton.querySelectorAll('span');
+                        for (const span of spans) {
+                            const text = span.textContent.trim();
+                            if (text.startsWith('$') && /\$[\d,]+/.test(text)) {
+                                return text;
+                            }
                         }
                     }
-                }
 
-                // button aria-label contains the total
-                const labelButton = document.querySelector('button[aria-label*="for"][aria-label*="night"]');
-                if (labelButton) {
-                    const match = labelButton.getAttribute('aria-label').match(/\$[\d,]+/);
-                    if (match) return match[0];
-                        }
+                    // button aria-label contains the total
+                    const labelButton = document.querySelector('button[aria-label*="for"][aria-label*="night"]');
+                    if (labelButton) {
+                        const match = labelButton.getAttribute('aria-label').match(/\$[\d,]+/);
+                        if (match) return match[0];
+                    }
 
                     return null;
                 }
@@ -747,7 +747,7 @@ async function trySpecificCrossMonthCombination(tabId, currentMonth, nextMonth, 
                 if (labelButton) {
                     const match = labelButton.getAttribute('aria-label').match(/\$[\d,]+/);
                     if (match) return match[0];
-                    }
+                }
 
                 return null;
             }

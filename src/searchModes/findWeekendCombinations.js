@@ -107,7 +107,7 @@ async function checkRegularWeekend(tabId, weekIdx) {
                 if (labelButton) {
                     const match = labelButton.getAttribute('aria-label').match(/\$[\d,]+/);
                     if (match) return match[0];
-                    }
+                }
 
                 return null;
             }
@@ -285,7 +285,7 @@ async function checkCrossMonthWeekend(tabId, nextMonth) {
                 if (labelButton) {
                     const match = labelButton.getAttribute('aria-label').match(/\$[\d,]+/);
                     if (match) return match[0];
-                    }
+                }
 
                 return null;
             }
