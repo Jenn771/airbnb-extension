@@ -198,10 +198,13 @@ async function checkRegularWeek(tabId, weekIdx, nights, totalWeeks, canCheckNext
             combinations.push(stayResult);
         }
         
+        // Always clear between attempts regardless of success,
+        // so the next check-in click starts from a clean state
+        await clearSelectedDates(tabId);
+
         await new Promise(resolve => setTimeout(resolve, 200));
     }
 
-    await clearSelectedDates(tabId);
     return combinations;
 }
 
@@ -566,9 +569,12 @@ async function checkCrossMonthNNight(tabId, currentMonth, nextMonth, nights) {
             combinations.push(stayResult);
         }
         
+        // Always clear between attempts regardless of success,
+        // so the next check-in click starts from a clean state
+        await clearSelectedDates(tabId);
+        
         await new Promise(resolve => setTimeout(resolve, 300));
     }
-    await clearSelectedDates(tabId);
 
     return combinations;
 }
