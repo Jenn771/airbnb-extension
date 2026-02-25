@@ -8,6 +8,7 @@ let flexibilityMode = 'respect';
 let processingQueue = [];
 let isProcessing = false;
 
+const API_BASE_URL = 'http://localhost:3000/api';
 const DOM_SELECTORS = {
     CARD_CONTAINER: '[data-testid="card-container"]',
     LISTING_TITLE: '[data-testid="listing-card-title"]',
@@ -413,6 +414,7 @@ async function processQueue() {
             
             if (result && result.success && result.results) {
                 updateButtonWithResult(listingData.index, result.results);
+                postPriceToAPI(listingData, result.results);
             } else if (result && result.success === false) {
                 console.warn(`Failed to process listing ${listingData.index}: ${result.error}`);
                 updateButtonToError(listingData.index);
@@ -454,6 +456,73 @@ async function processListing(listingData) {
             }
         });
     });
+}
+
+function buildSearchContext() {
+    const months = (searchParams.monthsToCheck || []).join(',');
+    let type;
+
+    const tripLengths = searchParams.flexible_trip_lengths || [];
+
+    if (flexibilityMode === 'respect') {
+        if (tripLengths.includes('weekend_trip')) {
+            type = 'weekend';
+        } else if (tripLengths.includes('one_week')) {
+            type = 'week';
+        } else {
+            type = 'respect';
+        }
+    } else {
+        type = `${desiredNights || 0}night`;
+    }
+
+    const monthsPart = months || 'unknown';
+    return `${type}|${monthsPart}`;
+}
+
+function parseBestPriceToNumber(bestPrice) {
+    if (!bestPrice) return null;
+
+    const numeric = parseFloat(bestPrice.replace(/[$,]/g, ''));
+    if (Number.isNaN(numeric)) {
+        return null;
+    }
+
+    return Math.round(numeric);
+}
+
+async function postPriceToAPI(listingData, results) {
+    try {
+        if (!API_BASE_URL) {
+            return;
+        }
+
+        const url = new URL(listingData.link);
+        const airbnbUrl = `${url.origin}${url.pathname}`;
+        const name = listingData.title || null;
+
+        const dateRange = results.bestDates || 'no-available-dates';
+        const totalPrice = parseBestPriceToNumber(results.bestPrice);
+        const searchContext = buildSearchContext();
+
+        const payload = {
+            airbnb_url: airbnbUrl,
+            name,
+            date_range: dateRange,
+            total_price: totalPrice,
+            search_context: searchContext
+        };
+
+        await fetch(`${API_BASE_URL}/listings/price`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+    } catch (error) {
+        console.error('Failed to POST price data to API', error);
+    }
 }
 
 function determineTargetMonths() {
