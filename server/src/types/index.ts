@@ -9,8 +9,9 @@ export interface PriceSnapshot {
     id: number;
     listing_id: number;
     date_range: string;
-    total_price: number;
+    total_price: number | null;
     checked_at: Date;
+    search_context: string;
 }
 
 // What the extension POSTs to the API
@@ -18,5 +19,6 @@ export interface IncomingPriceData {
     airbnb_url: string;
     name: string;
     date_range: string;
-    total_price: number;
+    total_price: number | null;
+    search_context: string;
 }
