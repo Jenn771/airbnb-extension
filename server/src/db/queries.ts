@@ -41,8 +41,23 @@ export async function insertPriceSnapshot(
     return snapshot;
 }
 
-// Get all price snapshots for a specific listing
-export async function getPriceHistory(airbnb_url: string): Promise<PriceSnapshot[]> {
+// Get price snapshots for a listing, optionally filtered by search_context (e.g. week|march)
+export async function getPriceHistory(
+    airbnb_url: string,
+    search_context?: string
+): Promise<PriceSnapshot[]> {
+    if (search_context) {
+        const result = await pool.query<PriceSnapshot>(
+            `SELECT ps.*
+             FROM price_snapshots ps
+             JOIN listings l ON l.id = ps.listing_id
+             WHERE l.airbnb_url = $1 AND ps.search_context = $2
+             ORDER BY ps.checked_at ASC`,
+            [airbnb_url, search_context]
+        );
+        return result.rows;
+    }
+
     const result = await pool.query<PriceSnapshot>(
         `SELECT ps.*
          FROM price_snapshots ps
@@ -51,7 +66,7 @@ export async function getPriceHistory(airbnb_url: string): Promise<PriceSnapshot
          ORDER BY ps.checked_at ASC`,
         [airbnb_url]
     );
-
+    
     return result.rows;
 }
 
