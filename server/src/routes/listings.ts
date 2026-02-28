@@ -1,8 +1,18 @@
 import express, { Request, Response } from 'express';
-import { insertPriceSnapshot, upsertListing } from '../db/queries';
+import { getAllListings, insertPriceSnapshot, upsertListing } from '../db/queries';
 import { IncomingPriceData } from '../types';
 
 const router = express.Router();
+
+router.get('/', async (_req: Request, res: Response) => {
+    try {
+        const listings = await getAllListings();
+        return res.json(listings);
+    } catch (error) {
+        console.error('Failed to fetch listings', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 router.post('/price', async (req: Request, res: Response) => {
     try {
