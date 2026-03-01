@@ -11,7 +11,11 @@
   },
 
   "permissions": ["scripting", "tabs", "storage"],
-  "host_permissions": ["https://www.airbnb.com/*"],
+  "host_permissions": [
+    "https://www.airbnb.com/*",
+    "http://localhost:3000/*",
+    "http://127.0.0.1:3000/*"
+  ],
 
   "background": {
     "service_worker": "src/scripts/background.js",
