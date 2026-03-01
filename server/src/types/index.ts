@@ -17,7 +17,7 @@ export interface PriceSnapshot {
 // What the extension POSTs to the API
 export interface IncomingPriceData {
     airbnb_url: string;
-    name: string;
+    name: string | null;
     date_range: string;
     total_price: number | null;
     search_context: string;
