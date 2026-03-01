@@ -31,7 +31,7 @@ function formatContextLabel(context: string): string {
 
 function formatPrice(price: number | null): string {
   if (price == null) return '—';
-  return `$${price}`;
+  return `$${price.toLocaleString()}`;
 }
 
 function statsForSnapshots(snapshots: PriceSnapshot[]) {
