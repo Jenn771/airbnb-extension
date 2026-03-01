@@ -5,10 +5,9 @@
 body {
   margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
-  background: #f5f5f5;
+  background: #f7f7f7;
 }
 
 #root {
   min-height: 100vh;
-  padding: 1rem;
 }

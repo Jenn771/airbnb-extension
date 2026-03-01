@@ -1,40 +1,69 @@
 import type { Listing, PriceSnapshot } from '../api';
-import { PriceChart } from './PriceChart';
+import { getTrend } from '../api';
+
+const COLORS = {
+  primary: '#0069A6',
+  rising: '#e53935',
+  dropping: '#2e7d32',
+  stable: '#666',
+};
 
 type ListingCardProps = {
   listing: Listing;
   snapshots: PriceSnapshot[];
+  selected: boolean;
+  onSelect: () => void;
 };
 
-export function ListingCard({ listing, snapshots }: ListingCardProps) {
+function formatPrice(price: number | null): string {
+  if (price == null) return '—';
+  return `$${price}`;
+}
+
+export function ListingCard({ listing, snapshots, selected, onSelect }: ListingCardProps) {
+  const trend = getTrend(snapshots);
+  const withPrice = snapshots.filter((s) => s.total_price != null);
+  const latestPrice =
+    withPrice.length > 0
+      ? withPrice[withPrice.length - 1].total_price
+      : null;
+
+  const trendLabel =
+    trend === 'rising' ? '↑ Rising' : trend === 'dropping' ? '↓ Dropping' : '→ Stable';
+  const trendColor = trend === 'rising' ? COLORS.rising : trend === 'dropping' ? COLORS.dropping : COLORS.stable;
+
   return (
-    <article
+    <button
+      type="button"
+      onClick={onSelect}
       style={{
-        background: 'white',
+        display: 'block',
+        width: '100%',
+        textAlign: 'left',
+        padding: 12,
+        marginBottom: 8,
+        background: '#fff',
+        border: selected ? `2px solid ${COLORS.primary}` : '1px solid #e0e0e0',
         borderRadius: 8,
-        padding: '1rem 1.25rem',
-        marginBottom: 16,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+        cursor: 'pointer',
       }}
     >
-      <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.1rem' }}>
+      <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>
         {listing.name || 'Unnamed listing'}
-      </h3>
-      <a
-        href={listing.airbnb_url}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{ fontSize: 14, color: '#0069A6' }}
+      </div>
+      <div style={{ fontSize: 13, color: '#333', marginBottom: 4 }}>
+        {formatPrice(latestPrice)}
+      </div>
+      <span
+        style={{
+          fontSize: 12,
+          color: trendColor,
+          fontWeight: 500,
+        }}
       >
-        View on Airbnb
-      </a>
-      {snapshots.length > 0 ? (
-        <PriceChart snapshots={snapshots} />
-      ) : (
-        <p style={{ margin: '1rem 0 0', color: '#666', fontSize: 14 }}>
-          No price history yet.
-        </p>
-      )}
-    </article>
+        {trendLabel}
+      </span>
+    </button>
   );
 }
