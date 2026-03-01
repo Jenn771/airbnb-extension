@@ -33,9 +33,13 @@ function formatDateRange(dateRange: string): string {
 }
 
 export function ListingCard({ listing, snapshots, selected, onSelect }: ListingCardProps) {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(listing.thumbnail_url ?? null);
 
   useEffect(() => {
+    if (listing.thumbnail_url) {
+      setImageUrl(listing.thumbnail_url);
+      return;
+    }
     let cancelled = false;
     fetchOgImage(listing.airbnb_url).then((url) => {
       if (!cancelled) setImageUrl(url);
@@ -43,7 +47,7 @@ export function ListingCard({ listing, snapshots, selected, onSelect }: ListingC
     return () => {
       cancelled = true;
     };
-  }, [listing.airbnb_url]);
+  }, [listing.airbnb_url, listing.thumbnail_url]);
 
   const byContext = groupSnapshotsByContext(snapshots);
   const mostRecentKey = getMostRecentContextKey(byContext);

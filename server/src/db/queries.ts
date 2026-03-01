@@ -73,8 +73,28 @@ export async function getPriceHistory(
 // Get all listings
 export async function getAllListings(): Promise<Listing[]> {
     const result = await pool.query<Listing>(
-        `SELECT * FROM listings ORDER BY created_at DESC`
+        `SELECT id, airbnb_url, name, thumbnail_url, created_at FROM listings ORDER BY created_at DESC`
     );
 
     return result.rows;
+}
+
+// Get thumbnail URL for a listing by airbnb_url (null if not set)
+export async function getListingThumbnail(airbnb_url: string): Promise<string | null> {
+    const result = await pool.query<{ thumbnail_url: string | null }>(
+        `SELECT thumbnail_url FROM listings WHERE airbnb_url = $1`,
+        [airbnb_url]
+    );
+    return result.rows[0]?.thumbnail_url ?? null;
+}
+
+// Update thumbnail URL for a listing by airbnb_url
+export async function updateListingThumbnail(
+    airbnb_url: string,
+    thumbnail_url: string
+): Promise<void> {
+    await pool.query(
+        `UPDATE listings SET thumbnail_url = $1 WHERE airbnb_url = $2`,
+        [thumbnail_url, airbnb_url]
+    );
 }

@@ -1,13 +1,20 @@
 import express, { Request, Response } from 'express';
+import { getListingThumbnail, updateListingThumbnail } from '../db/queries';
 
 const router = express.Router();
 
-/** GET /api/og-image?url=... - returns { imageUrl: string | null } from og:image meta tag */
+/** GET /api/og-image?url=... - returns { imageUrl: string | null }. Uses DB if set, else fetches and saves. */
 router.get('/', async (req: Request, res: Response) => {
   const url = req.query.url;
   if (typeof url !== 'string' || !url.startsWith('https://')) {
     return res.status(400).json({ imageUrl: null });
   }
+
+  const stored = await getListingThumbnail(url);
+  if (stored) {
+    return res.json({ imageUrl: stored });
+  }
+
   try {
     const response = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AirbnbDashboard/1.0)' },
@@ -19,6 +26,9 @@ router.get('/', async (req: Request, res: Response) => {
     const match = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
       ?? html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
     const imageUrl = match ? match[1]?.trim() ?? null : null;
+    if (imageUrl) {
+      await updateListingThumbnail(url, imageUrl).catch(() => {});
+    }
     return res.json({ imageUrl });
   } catch {
     return res.json({ imageUrl: null });

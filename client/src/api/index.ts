@@ -7,6 +7,7 @@ export interface Listing {
   id: number;
   airbnb_url: string;
   name: string | null;
+  thumbnail_url: string | null;
   created_at: string;
 }
 
