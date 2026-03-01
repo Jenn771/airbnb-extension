@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import listingsRouter from './routes/listings';
 import snapshotsRouter from './routes/snapshots';
+import ogImageRouter from './routes/og-image';
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use('/api/listings', listingsRouter);
 app.use('/api/snapshots', snapshotsRouter);
+app.use('/api/og-image', ogImageRouter);
 
 const port = process.env.PORT || 3000;
 
