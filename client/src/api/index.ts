@@ -31,6 +31,13 @@ export async function fetchListings(): Promise<Listing[]> {
   return res.json();
 }
 
+export async function fetchOgImage(url: string): Promise<string | null> {
+  const res = await fetch(`${API_BASE}/og-image?${new URLSearchParams({ url })}`);
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.imageUrl ?? null;
+}
+
 export async function fetchPriceHistory(
   airbnbUrl: string,
   searchContext?: string
@@ -86,4 +93,23 @@ export function getTrend(
   if (b > a) return 'rising';
   if (b < a) return 'dropping';
   return 'stable';
+}
+
+/** Context key whose snapshots have the latest checked_at. */
+export function getMostRecentContextKey(
+  byContext: Map<string, PriceSnapshot[]>
+): string | null {
+  let latestKey: string | null = null;
+  let latestTime = 0;
+  for (const [key, list] of byContext.entries()) {
+    if (list.length === 0) continue;
+    const maxTime = Math.max(
+      ...list.map((s) => new Date(s.checked_at).getTime())
+    );
+    if (maxTime > latestTime) {
+      latestTime = maxTime;
+      latestKey = key;
+    }
+  }
+  return latestKey;
 }

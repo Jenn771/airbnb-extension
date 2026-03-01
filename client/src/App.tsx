@@ -72,51 +72,86 @@ export default function App() {
   }
   if (listings.length === 0) {
     return (
-      <div style={{ padding: 24, background: COLORS.background, minHeight: '100vh', color: '#666' }}>
-        No listings yet. Use the extension to check prices on Airbnb; they will appear here.
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          background: COLORS.background,
+          color: '#666',
+          fontSize: 15,
+          textAlign: 'center',
+          padding: 24,
+        }}
+      >
+        No listings yet. Use the extension to check prices on Airbnb — they will appear here automatically.
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        minHeight: '100vh',
-        background: COLORS.background,
-      }}
-    >
-      <aside
+    <div style={{ minHeight: '100vh', background: COLORS.background }}>
+      {/* Full-width header above sidebar and main */}
+      <header
         style={{
-          width: 280,
-          flexShrink: 0,
-          padding: 16,
-          overflowY: 'auto',
-          borderRight: '1px solid #e0e0e0',
-          background: '#fff',
+          width: '100%',
+          padding: '24px 28px',
+          background: COLORS.background,
+          borderBottom: '1px solid #ebebeb',
+          boxSizing: 'border-box',
         }}
       >
-        <h2 style={{ margin: '0 0 16px', fontSize: 18, color: COLORS.primary }}>
-          Listings
-        </h2>
-        {listings.map((listing) => (
-          <ListingCard
-            key={listing.id}
-            listing={listing}
-            snapshots={historyByUrl[listing.airbnb_url] ?? []}
-            selected={selectedListing?.id === listing.id}
-            onSelect={() => setSelectedListing(listing)}
-          />
-        ))}
-      </aside>
-      <main style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
-        {selectedListing && (
-          <MainPanel
-            listing={selectedListing}
-            snapshots={historyByUrl[selectedListing.airbnb_url] ?? []}
-          />
-        )}
-      </main>
+        <h1 style={{ fontSize: 25, fontWeight: 700, color: COLORS.primary, margin: '0 0 6px' }}>
+          Airbnb Price Tracker
+        </h1>
+        <p style={{ fontSize: 13, color: '#888', margin: 0 }}>
+          Track price changes across your saved listings
+        </p>
+      </header>
+
+      <div
+        style={{
+          display: 'flex',
+          flex: 1,
+          minHeight: 'calc(100vh - 80px)',
+        }}
+      >
+        <aside
+          style={{
+            width: 300,
+            flexShrink: 0,
+            padding: 20,
+            overflowY: 'auto',
+            background: '#f7f7f7',
+          }}
+        >
+          {listings.map((listing) => (
+            <ListingCard
+              key={listing.id}
+              listing={listing}
+              snapshots={historyByUrl[listing.airbnb_url] ?? []}
+              selected={selectedListing?.id === listing.id}
+              onSelect={() => setSelectedListing(listing)}
+            />
+          ))}
+        </aside>
+        <main
+          style={{
+            flex: 1,
+            padding: 28,
+            overflowY: 'auto',
+            background: COLORS.background,
+          }}
+        >
+          {selectedListing && (
+            <MainPanel
+              listing={selectedListing}
+              snapshots={historyByUrl[selectedListing.airbnb_url] ?? []}
+            />
+          )}
+        </main>
+      </div>
     </div>
   );
 }
