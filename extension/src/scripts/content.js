@@ -8,7 +8,6 @@ let flexibilityMode = 'respect';
 let processingQueue = [];
 let isProcessing = false;
 
-const API_BASE_URL = 'http://localhost:3000/api';
 const DOM_SELECTORS = {
     CARD_CONTAINER: '[data-testid="card-container"]',
     LISTING_TITLE: '[data-testid="listing-card-title"]',
@@ -492,37 +491,29 @@ function parseBestPriceToNumber(bestPrice) {
 }
 
 async function postPriceToAPI(listingData, results) {
-    try {
-        if (!API_BASE_URL) {
-            return;
+    const url = new URL(listingData.link);
+    const airbnbUrl = `${url.origin}${url.pathname}`;
+    const name = listingData.title || null;
+    const dateRange = results.bestDates || 'no-available-dates';
+    const totalPrice = parseBestPriceToNumber(results.bestPrice);
+    const searchContext = buildSearchContext();
+
+    const payload = {
+        airbnb_url: airbnbUrl,
+        name,
+        date_range: dateRange,
+        total_price: totalPrice,
+        search_context: searchContext
+    };
+
+    chrome.runtime.sendMessage(
+        { type: 'POST_PRICE_TO_API', payload },
+        (response) => {
+            if (chrome.runtime.lastError) {
+                console.error('Failed to POST price data to API', chrome.runtime.lastError);
+            }
         }
-
-        const url = new URL(listingData.link);
-        const airbnbUrl = `${url.origin}${url.pathname}`;
-        const name = listingData.title || null;
-
-        const dateRange = results.bestDates || 'no-available-dates';
-        const totalPrice = parseBestPriceToNumber(results.bestPrice);
-        const searchContext = buildSearchContext();
-
-        const payload = {
-            airbnb_url: airbnbUrl,
-            name,
-            date_range: dateRange,
-            total_price: totalPrice,
-            search_context: searchContext
-        };
-
-        await fetch(`${API_BASE_URL}/listings/price`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-    } catch (error) {
-        console.error('Failed to POST price data to API', error);
-    }
+    );
 }
 
 function determineTargetMonths() {

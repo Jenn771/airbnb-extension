@@ -1,7 +1,30 @@
 import { clearSelectedDates, getCurrentMonth, navigateForwardToMonth, navigateBackwardToMonth, getMonthIndex } from './helpers/calendarHelpers.js';
 import { findWeekendCombinations, findWeekCombinations, findNNightCombinations } from '../searchModes/index.js';
 
+const API_BASE_URL = 'http://localhost:3000/api';
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === "POST_PRICE_TO_API") {
+        (async () => {
+            try {
+                if (!API_BASE_URL || !message.payload) {
+                    sendResponse({ ok: false });
+                    return;
+                }
+                const res = await fetch(`${API_BASE_URL}/listings/price`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(message.payload),
+                });
+                sendResponse({ ok: res.ok });
+            } catch (err) {
+                console.error('Background: failed to POST price to API', err);
+                sendResponse({ ok: false });
+            }
+        })();
+        return true;
+    }
+    
     if (message.type === "OPEN_LISTING_TAB") {
         (async () => {
             let tab;
