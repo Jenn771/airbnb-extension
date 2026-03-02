@@ -103,9 +103,7 @@ export function ListingCard({ listing, snapshots, selected, onSelect }: ListingC
         >
           {imageUrl ? (
             <img src={imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : (
-            <span>🏠</span>
-          )}
+          ) : null}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
