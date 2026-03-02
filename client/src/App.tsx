@@ -17,7 +17,7 @@ const COLORS = {
 };
 
 const header = (
-  <header style={{ width: '100%', padding: '24px 28px', background: COLORS.background, borderBottom: '1px solid #ebebeb', boxSizing: 'border-box' }}>
+  <header style={{ width: '100%', flexShrink: 0, padding: '24px 28px', background: COLORS.background, borderBottom: '1px solid #ebebeb', boxSizing: 'border-box' }}>
     <h1 style={{ fontSize: 25, fontWeight: 700, color: COLORS.primary, margin: '0 0 6px' }}>
       Airbnb Price Tracker
     </h1>
@@ -87,12 +87,27 @@ export default function App() {
 
 
   return (
-    <div style={{ minHeight: '100vh', background: COLORS.background }}>
-      {/* Full-width header above sidebar and main */}
+    <div
+      style={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        background: COLORS.background,
+        overflow: 'hidden',
+      }}
+    >
+      {/* Fixed header at top - does not scroll */}
       {header}
 
-      <div style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 80px)' }}>
-  
+      {/* Sidebar + main: fill remaining height, scroll independently */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          minHeight: 0,
+          overflow: 'hidden',
+        }}
+      >
         {/* Only show sidebar if there are listings */}
         {listings.length > 0 && (
           <aside
@@ -119,23 +134,24 @@ export default function App() {
         <main
           style={{
             flex: 1,
+            minWidth: 0,
             padding: 28,
             overflowY: 'auto',
             background: COLORS.background,
-            display: 'flex',
-            flexDirection: 'column',
           }}
         >
           {listings.length === 0 ? (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-              color: '#888',
-              fontSize: 15,
-              textAlign: 'center',
-            }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '100%',
+                color: '#888',
+                fontSize: 15,
+                textAlign: 'center',
+              }}
+            >
               No listings yet. Use the extension to check prices on Airbnb and they will appear here automatically.
             </div>
           ) : selectedListing ? (
