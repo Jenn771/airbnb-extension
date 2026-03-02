@@ -41,6 +41,45 @@ export async function insertPriceSnapshot(
     return snapshot;
 }
 
+// Atomically upsert listing and insert price snapshot (avoids partial state on failure)
+export async function savePriceSnapshot(data: IncomingPriceData): Promise<PriceSnapshot> {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        const upsertResult = await client.query<{ id: number }>(
+            `INSERT INTO listings (airbnb_url, name)
+             VALUES ($1, $2)
+             ON CONFLICT (airbnb_url)
+             DO UPDATE SET name = EXCLUDED.name
+             RETURNING id`,
+            [data.airbnb_url, data.name]
+        );
+        const listing = upsertResult.rows[0];
+        if (!listing) {
+            await client.query('ROLLBACK');
+            throw new Error('Upsert failed');
+        }
+        const insertResult = await client.query<PriceSnapshot>(
+            `INSERT INTO price_snapshots (listing_id, date_range, total_price, search_context)
+             VALUES ($1, $2, $3, $4)
+             RETURNING *`,
+            [listing.id, data.date_range, data.total_price, data.search_context]
+        );
+        const snapshot = insertResult.rows[0];
+        if (!snapshot) {
+            await client.query('ROLLBACK');
+            throw new Error('Price snapshot not returned after insert');
+        }
+        await client.query('COMMIT');
+        return snapshot;
+    } catch (e) {
+        await client.query('ROLLBACK').catch(() => {});
+        throw e;
+    } finally {
+        client.release();
+    }
+}
+
 // Get price snapshots for a listing, optionally filtered by search_context (e.g. week|march)
 export async function getPriceHistory(
     airbnb_url: string,

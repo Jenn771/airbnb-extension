@@ -10,12 +10,12 @@ router.get('/', async (req: Request, res: Response) => {
     return res.status(400).json({ imageUrl: null });
   }
 
-  const stored = await getListingThumbnail(url);
-  if (stored) {
-    return res.json({ imageUrl: stored });
-  }
-
   try {
+    const stored = await getListingThumbnail(url);
+    if (stored) {
+      return res.json({ imageUrl: stored });
+    }
+
     const response = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AirbnbDashboard/1.0)' },
     });

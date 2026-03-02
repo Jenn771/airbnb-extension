@@ -41,9 +41,13 @@ export function ListingCard({ listing, snapshots, selected, onSelect }: ListingC
       return;
     }
     let cancelled = false;
-    fetchOgImage(listing.airbnb_url).then((url) => {
-      if (!cancelled) setImageUrl(url);
-    });
+    fetchOgImage(listing.airbnb_url)
+      .then((url) => {
+        if (!cancelled) setImageUrl(url);
+      })
+      .catch(() => {
+        // Leave imageUrl as null; card will show placeholder
+      });
     return () => {
       cancelled = true;
     };

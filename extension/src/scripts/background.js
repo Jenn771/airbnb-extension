@@ -7,7 +7,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "POST_PRICE_TO_API") {
         (async () => {
             try {
-                if (!API_BASE_URL || !message.payload) {
+                if (!message.payload) {
                     sendResponse({ ok: false });
                     return;
                 }
@@ -138,20 +138,19 @@ async function processListingCalendar(tabId, message) {
         await clearSelectedDates(tabId);
         await navigateToFirstTargetMonth(tabId, message.months);
         
-        if (message.mode === "respect") {
+        if (message.mode === "respect" && Array.isArray(message.tripLength)) {
             if (message.tripLength.includes("weekend_trip")) {
-                const weekendResults = await findWeekendCombinations(tabId, message.months);
+                const weekendResults = await findWeekendCombinations(tabId, message.months || []);
                 return findCheapestCombination(weekendResults);
             }
-            else if (message.tripLength.includes("one_week")) {
-                const weekResults = await findWeekCombinations(tabId, message.months);
-                return findCheapestCombination(weekResults); 
+            if (message.tripLength.includes("one_week")) {
+                const weekResults = await findWeekCombinations(tabId, message.months || []);
+                return findCheapestCombination(weekResults);
             }
         }
 
         if (message.mode === "ignore") {
-            // Find N-night sequences of consecutive available days
-            const flexibleResults = await findNNightCombinations(tabId, message.months, message.nights);
+            const flexibleResults = await findNNightCombinations(tabId, message.months || [], message.nights);
             return findCheapestCombination(flexibleResults);
         }
 
@@ -171,6 +170,11 @@ async function processListingCalendar(tabId, message) {
 
 async function navigateToFirstTargetMonth(tabId, targetMonths) {
     await ensureTabActive(tabId);
+
+    if (!targetMonths || targetMonths.length === 0) {
+        const currentCalendarMonth = await getCurrentMonth(tabId);
+        return currentCalendarMonth.split(' ')[0].toLowerCase();
+    }
 
     const currentCalendarMonth = await getCurrentMonth(tabId);  
     const currentCalendarMonthName = currentCalendarMonth.split(' ')[0].toLowerCase();

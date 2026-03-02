@@ -26,17 +26,21 @@ export async function fetchListings(): Promise<Listing[]> {
   // Send request to server
   const res = await fetch(`${API_BASE}/listings`);
 
-  if (!res.ok) throw new Error('Failed to fetch listings');
-
-  // Parse response as JSON
+  if (!res.ok) {
+    throw new Error(`Failed to fetch listings: ${res.status}`);
+  }
   return res.json();
 }
 
 export async function fetchOgImage(url: string): Promise<string | null> {
   const res = await fetch(`${API_BASE}/og-image?${new URLSearchParams({ url })}`);
   if (!res.ok) return null;
-  const data = await res.json();
-  return data.imageUrl ?? null;
+  try {
+    const data = await res.json();
+    return data.imageUrl ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchPriceHistory(
@@ -52,9 +56,9 @@ export async function fetchPriceHistory(
   // Send request to server
   const res = await fetch(`${API_BASE}/snapshots?${params.toString()}`);
 
-  if (!res.ok) throw new Error('Failed to fetch price history');
-  
-  // Parse response as JSON
+  if (!res.ok) {
+    throw new Error(`Failed to fetch price history: ${res.status}`);
+  }
   return res.json();
 }
 

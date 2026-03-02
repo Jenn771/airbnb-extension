@@ -405,6 +405,7 @@ async function processQueue() {
 
     while (processingQueue.length > 0) {
         const listingData = processingQueue.shift();
+        const searchContext = buildSearchContext();
 
         try {
             updateButtonToProcessing(listingData.index);
@@ -413,7 +414,7 @@ async function processQueue() {
             
             if (result && result.success && result.results) {
                 updateButtonWithResult(listingData.index, result.results);
-                postPriceToAPI(listingData, result.results);
+                postPriceToAPI(listingData, result.results, searchContext);
             } else if (result && result.success === false) {
                 console.warn(`Failed to process listing ${listingData.index}: ${result.error}`);
                 updateButtonToError(listingData.index);
@@ -490,13 +491,18 @@ function parseBestPriceToNumber(bestPrice) {
     return Math.round(numeric);
 }
 
-async function postPriceToAPI(listingData, results) {
-    const url = new URL(listingData.link);
+function postPriceToAPI(listingData, results, searchContext) {
+    let url;
+    try {
+        url = new URL(listingData.link);
+    } catch {
+        console.warn('Skipping API post: invalid or missing listing link', listingData.link);
+        return;
+    }
     const airbnbUrl = `${url.origin}${url.pathname}`;
     const name = listingData.title || null;
     const dateRange = results.bestDates || 'no-available-dates';
     const totalPrice = parseBestPriceToNumber(results.bestPrice);
-    const searchContext = buildSearchContext();
 
     const payload = {
         airbnb_url: airbnbUrl,

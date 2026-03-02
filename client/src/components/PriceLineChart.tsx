@@ -28,7 +28,7 @@ function formatDate(iso: string) {
   }
 }
 
-export function PriceLineChart({ snapshots, title }: PriceLineChartProps) {
+export function PriceLineChart({ snapshots = [], title }: PriceLineChartProps) {
   const data = snapshots
     .filter((s) => s.total_price != null)
     .map((s) => ({
