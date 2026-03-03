@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import listingsRouter from './routes/listings';
 import snapshotsRouter from './routes/snapshots';
 import ogImageRouter from './routes/og-image';
+import { initializeDatabase } from './db/client';
 
 dotenv.config();
 
@@ -18,6 +19,13 @@ app.use('/api/og-image', ogImageRouter);
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
-});
+initializeDatabase()
+    .then(() => {
+        app.listen(port, () => {
+            console.log(`Server listening on port ${port}`);
+        });
+    })
+    .catch((err) => {
+        console.error('Failed to initialize database:', err);
+        process.exit(1);
+    });
