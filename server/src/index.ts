@@ -14,7 +14,8 @@ app.use(cors({
     origin: [
         'https://www.airbnb.com',
         'https://enthusiastic-contentment-production-3bf3.up.railway.app',
-        'http://localhost:5173'
+        'http://localhost:5173',
+        `chrome-extension://kfolainbdpdnngbojeemhjkjjpgiedah`
     ]
 }));
 app.use(express.json());
