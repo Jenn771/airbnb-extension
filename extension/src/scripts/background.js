@@ -1,7 +1,7 @@
 import { clearSelectedDates, getCurrentMonth, navigateForwardToMonth, navigateBackwardToMonth, getMonthIndex } from './helpers/calendarHelpers.js';
 import { findWeekendCombinations, findWeekCombinations, findNNightCombinations } from '../searchModes/index.js';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'https://airbnb-extension-production.up.railway.app/api';
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "POST_PRICE_TO_API") {

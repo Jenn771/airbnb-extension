@@ -10,7 +10,13 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: [
+        'https://www.airbnb.com',
+        'https://enthusiastic-contentment-production-3bf3.up.railway.app',
+        'http://localhost:5173'
+    ]
+}));
 app.use(express.json());
 
 app.use('/api/listings', listingsRouter);
