@@ -20,7 +20,7 @@ export interface PriceSnapshot {
   search_context: string;
 }
 
-const API_BASE = '/api';
+const API_BASE = (import.meta.env.VITE_API_URL || '') + '/api';
 
 export async function fetchListings(): Promise<Listing[]> {
   // Send request to server
