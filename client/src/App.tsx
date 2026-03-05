@@ -93,7 +93,8 @@ export default function App() {
         display: 'flex',
         flexDirection: 'column',
         background: COLORS.background,
-        overflow: 'hidden',
+        overflowX: 'auto', 
+        overflowY: 'hidden',
       }}
     >
       {/* Fixed header at top - does not scroll */}
@@ -105,7 +106,7 @@ export default function App() {
           flex: 1,
           display: 'flex',
           minHeight: 0,
-          overflow: 'hidden',
+          minWidth: 1100,
         }}
       >
         {/* Only show sidebar if there are listings */}

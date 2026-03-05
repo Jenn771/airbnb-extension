@@ -133,6 +133,8 @@ export function MainPanel({ listing, snapshots }: MainPanelProps) {
               padding: 28,
               marginBottom: 40,
               boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+              minWidth: 0,
+              overflow: 'hidden',
             }}
           >
             <div
@@ -215,6 +217,8 @@ export function MainPanel({ listing, snapshots }: MainPanelProps) {
                   padding: 24,
                   marginBottom: 24,
                   boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                  minWidth: 0,
+                  overflow: 'hidden',
                 }}
               >
                 <h3
