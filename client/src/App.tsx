@@ -10,18 +10,36 @@ import { MainPanel } from './components/MainPanel';
 
 const COLORS = {
   primary: '#0069A6',
-  background: '#f7f7f7',
+  background: '#f8fafc',
   rising: '#e53935',
   dropping: '#2e7d32',
-  stable: '#666',
+  stable: '#64748b',
 };
 
 const header = (
-  <header style={{ width: '100%', flexShrink: 0, padding: '24px 28px', background: COLORS.background, borderBottom: '1px solid #ebebeb', boxSizing: 'border-box' }}>
-    <h1 style={{ fontSize: 25, fontWeight: 700, color: COLORS.primary, margin: '0 0 6px' }}>
+  <header style={{ 
+    width: '100%', 
+    flexShrink: 0, 
+    padding: '20px 32px',
+    background: '#fff',
+    borderBottom: '1px solid #e2e8f0', 
+    boxSizing: 'border-box' 
+  }}>
+    <h1 style={{ 
+      fontSize: 22,
+      fontWeight: 800,
+      color: COLORS.primary,
+      margin: 0,
+      letterSpacing: '-0.02em' 
+    }}>
       Airbnb Price Tracker
     </h1>
-    <p style={{ fontSize: 13, color: '#888', margin: 0 }}>
+    <p style={{ 
+      fontSize: 13, 
+      color: '#64748b', 
+      margin: '4px 0 0',
+      fontWeight: 500 
+    }}>
       Track price changes across your saved listings
     </p>
   </header>
@@ -71,7 +89,9 @@ export default function App() {
     return (
       <div style={{ minHeight: '100vh', background: COLORS.background }}>
         {header}
-        <div style={{ padding: 28, color: '#888', fontSize: 14 }}>Loading…</div>
+        <div style={{ padding: 40, color: '#64748b', fontSize: 14, fontWeight: 500 }}>
+          Initializing dashboard...
+        </div>
       </div>
     );
   }
@@ -80,11 +100,12 @@ export default function App() {
     return (
       <div style={{ minHeight: '100vh', background: COLORS.background }}>
         {header}
-        <div style={{ padding: 28, color: COLORS.rising, fontSize: 14 }}>{error}</div>
+        <div style={{ padding: 40, color: COLORS.rising, fontSize: 14, fontWeight: 500 }}>
+          {error}
+        </div>
       </div>
     );
   }
-
 
   return (
     <div
@@ -97,10 +118,8 @@ export default function App() {
         overflowY: 'hidden',
       }}
     >
-      {/* Fixed header at top - does not scroll */}
       {header}
 
-      {/* Sidebar + main: fill remaining height, scroll independently */}
       <div
         style={{
           flex: 1,
@@ -109,15 +128,15 @@ export default function App() {
           minWidth: 1100,
         }}
       >
-        {/* Only show sidebar if there are listings */}
         {listings.length > 0 && (
           <aside
             style={{
-              width: 300,
+              width: 320, 
               flexShrink: 0,
-              padding: 20,
+              padding: '24px 20px',
               overflowY: 'auto',
-              background: '#f7f7f7',
+              background: '#f8fafc',
+              borderRight: '1px solid #e2e8f0', 
             }}
           >
             {listings.map((listing) => (
@@ -148,9 +167,8 @@ export default function App() {
           style={{
             flex: 1,
             minWidth: 0,
-            padding: 28,
+            padding: '32px 40px',
             overflowY: 'auto',
-            background: COLORS.background,
           }}
         >
           {listings.length === 0 ? (
@@ -160,7 +178,7 @@ export default function App() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 minHeight: '100%',
-                color: '#888',
+                color: '#64748b',
                 fontSize: 15,
                 textAlign: 'center',
               }}

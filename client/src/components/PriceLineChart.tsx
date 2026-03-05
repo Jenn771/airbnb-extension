@@ -49,35 +49,34 @@ export function PriceLineChart({ snapshots = [], title }: PriceLineChartProps) {
   }
 
   return (
-    <div style={{ marginTop: 16 }}>
+    <div>
       {title && (
         <h4 style={{ margin: '0 0 8px', fontSize: 14, fontWeight: 600 }}>{title}</h4>
       )}
-      <ResponsiveContainer width="100%" height={260}>
-        <LineChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-          <XAxis
-            dataKey="dateLabel"
-            tick={{ fontSize: 11 }}
-            interval="preserveStartEnd"
-          />
+      <ResponsiveContainer width="100%" height={200}>
+        <LineChart data={data} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+          <XAxis dataKey="dateLabel" tick={{ fontSize: 11, fill: '#888' }} axisLine={false} tickLine={false} />
           <YAxis
             dataKey="price"
-            tick={{ fontSize: 11 }}
-            tickFormatter={(v) => `$${v}`}
+            tick={{ fontSize: 11, fill: '#888' }}
+            tickFormatter={(v) => `$${v.toLocaleString()}`}
+            axisLine={false}
+            tickLine={false}
+            domain={['auto', 'auto']}
+            width={70}
           />
           <Tooltip
-            formatter={(value: number) => [`$${value}`, 'Price']}
-            labelFormatter={(_, payload) =>
-              payload?.[0]?.payload?.dateLabel ?? ''
-            }
+            formatter={(value: number) => [`$${value.toLocaleString()}`, 'Price']}
+            labelFormatter={(_, payload) => payload?.[0]?.payload?.dateLabel ?? ''}
           />
           <Line
             type="monotone"
             dataKey="price"
             stroke={PRIMARY}
             strokeWidth={2}
-            dot={{ r: 3 }}
+            dot={{ r: 4, fill: PRIMARY }}
+            activeDot={{ r: 6 }}
             name="Price"
           />
         </LineChart>

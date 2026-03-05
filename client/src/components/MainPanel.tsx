@@ -90,14 +90,14 @@ export function MainPanel({ listing, snapshots }: MainPanelProps) {
         rel="noopener noreferrer"
         title="Open listing on Airbnb"
         style={{
-          fontSize: 18,
+          fontSize: 16,
           fontWeight: 600,
           color: COLORS.primary,
           textDecoration: 'none',
           display: 'inline-flex',
           alignItems: 'center',
           gap: 6,
-          marginBottom: 32,
+          marginBottom: 24,
         }}
         onMouseOver={(e) => {
           e.currentTarget.style.textDecoration = 'underline';
