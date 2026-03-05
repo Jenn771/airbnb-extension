@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { getAllListings, savePriceSnapshot } from '../db/queries';
+import { getAllListings, savePriceSnapshot, deleteListing } from '../db/queries';
 import { IncomingPriceData } from '../types';
 
 const router = express.Router();
@@ -33,6 +33,27 @@ router.post('/price', async (req: Request, res: Response) => {
         return res.status(201).json(snapshot);
     } catch (error: unknown) {
         console.error('Failed to save price snapshot', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.delete('/:id', async (req: Request, res: Response) => {
+    try {
+        const paramId = req.params.id;
+        if (typeof paramId !== 'string') {
+            return res.status(400).json({ error: 'Invalid listing id' });
+        }
+        const id = parseInt(paramId, 10);
+        if (Number.isNaN(id)) {
+            return res.status(400).json({ error: 'Invalid listing id' });
+        }
+        const deleted = await deleteListing(id);
+        if (!deleted) {
+            return res.status(404).json({ error: 'Listing not found' });
+        }
+        return res.status(200).send();
+    } catch (error: unknown) {
+        console.error('Failed to delete listing', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
 });

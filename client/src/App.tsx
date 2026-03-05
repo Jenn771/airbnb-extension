@@ -126,6 +126,18 @@ export default function App() {
                 snapshots={historyByUrl[listing.airbnb_url] ?? []}
                 selected={selectedListing?.id === listing.id}
                 onSelect={() => setSelectedListing(listing)}
+                onDelete={() => {
+                  setListings((prev) => prev.filter((l) => l.id !== listing.id));
+                  setHistoryByUrl((prev) => {
+                    const next = { ...prev };
+                    delete next[listing.airbnb_url];
+                    return next;
+                  });
+                  if (selectedListing?.id === listing.id) {
+                    const remaining = listings.filter((l) => l.id !== listing.id);
+                    setSelectedListing(remaining.length > 0 ? remaining[0] : null);
+                  }
+                }}
               />
             ))}
           </aside>

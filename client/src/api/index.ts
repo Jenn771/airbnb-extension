@@ -32,6 +32,12 @@ export async function fetchListings(): Promise<Listing[]> {
   return res.json();
 }
 
+export async function deleteListing(id: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/listings/${id}`, { method: 'DELETE' });
+  if (res.status === 404) throw new Error('Listing not found');
+  if (!res.ok) throw new Error(`Failed to delete listing: ${res.status}`);
+}
+
 export async function fetchOgImage(url: string): Promise<string | null> {
   const res = await fetch(`${API_BASE}/og-image?${new URLSearchParams({ url })}`);
   if (!res.ok) return null;

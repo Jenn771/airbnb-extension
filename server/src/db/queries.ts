@@ -109,6 +109,12 @@ export async function getPriceHistory(
     return result.rows;
 }
 
+// Delete a listing by id (price_snapshots cascade automatically)
+export async function deleteListing(id: number): Promise<boolean> {
+    const result = await pool.query('DELETE FROM listings WHERE id = $1', [id]);
+    return (result.rowCount ?? 0) > 0;
+}
+
 // Get all listings
 export async function getAllListings(): Promise<Listing[]> {
     const result = await pool.query<Listing>(
