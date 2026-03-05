@@ -11,12 +11,18 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-    origin: [
-        'https://www.airbnb.com',
-        'https://enthusiastic-contentment-production-3bf3.up.railway.app',
-        'http://localhost:5173',
-        `chrome-extension://kfolainbdpdnngbojeemhjkjjpgiedah`
-    ]
+    origin: (origin, callback) => {
+        const allowed = [
+            'https://www.airbnb.com',
+            'https://enthusiastic-contentment-production-3bf3.up.railway.app',
+            'http://localhost:5173',
+        ];
+        if (!origin || allowed.includes(origin) || origin.startsWith('chrome-extension://')) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    }
 }));
 app.use(express.json());
 
