@@ -116,11 +116,11 @@ return (
         }}
       >
         {/* Top row: image + name + date range */}
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 12 }}>
           <div
             style={{
-              width: 44,
-              height: 44,
+              width: 65,
+              height: 65,
               flexShrink: 0,
               borderRadius: 8,
               overflow: 'hidden',
@@ -128,7 +128,6 @@ return (
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 20,
             }}
           >
             {imageUrl ? (
@@ -136,11 +135,11 @@ return (
             ) : null}
           </div>
           
-          <div style={{ flex: 1, minWidth: 0, paddingRight: 30 }}>
+          <div style={{ flex: 1, minWidth: 0, paddingRight: 30, marginTop: 8 }}>
             <div
               style={{
                 fontWeight: 600,
-                fontSize: 13,
+                fontSize: 14,
                 color: '#222',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
@@ -150,7 +149,7 @@ return (
             >
               {listingName}
             </div>
-            <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
+            <div style={{ fontSize: 13, color: '#888', marginTop: 3 }}>
               {mostRecentDateRange}
             </div>
           </div>
@@ -159,10 +158,10 @@ return (
         {/* Bottom row: price + trend badge */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#222' }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#222' }}>
               {formatPrice(latestPrice)}
             </span>
-            <span style={{ fontSize: 11, color: '#aaa', marginLeft: 4 }}>latest</span>
+            <span style={{ fontSize: 12, color: '#aaa', marginLeft: 4 }}>latest</span>
           </div>
           <span
             title="Trend in the most recent search context"

@@ -116,7 +116,7 @@ export default function App() {
         background: COLORS.background,
         overflowX: 'auto', 
         overflowY: 'hidden',
-        minWidth: 1100,
+        minWidth: 1160,
       }}
     >
       {header}
@@ -126,13 +126,13 @@ export default function App() {
           flex: 1,
           display: 'flex',
           minHeight: 0,
-          minWidth: 1100,
+          minWidth: 1160,
         }}
       >
         {listings.length > 0 && (
           <aside
             style={{
-              width: 320, 
+              width: 350, 
               flexShrink: 0,
               padding: '24px 20px',
               overflowY: 'auto',
