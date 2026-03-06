@@ -111,7 +111,7 @@ return (
           background: '#fff',
           border: selected ? `2px solid ${COLORS.primary}` : '2px solid transparent',
           borderRadius: 12,
-          boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+          boxShadow: '0 1px 6px rgba(0,0,0,0.12)',
           cursor: 'pointer',
         }}
       >

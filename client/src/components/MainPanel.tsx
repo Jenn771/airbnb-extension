@@ -132,7 +132,7 @@ export function MainPanel({ listing, snapshots }: MainPanelProps) {
               borderRadius: 10,
               padding: 28,
               marginBottom: 40,
-              boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+              boxShadow: '0 1px 6px rgba(0,0,0,0.08)',
               minWidth: 0,
               overflow: 'hidden',
             }}
@@ -216,7 +216,7 @@ export function MainPanel({ listing, snapshots }: MainPanelProps) {
                   borderRadius: 10,
                   padding: 24,
                   marginBottom: 24,
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
                   minWidth: 0,
                   overflow: 'hidden',
                 }}
