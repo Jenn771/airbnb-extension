@@ -116,6 +116,7 @@ export default function App() {
         background: COLORS.background,
         overflowX: 'auto', 
         overflowY: 'hidden',
+        minWidth: 1100,
       }}
     >
       {header}
