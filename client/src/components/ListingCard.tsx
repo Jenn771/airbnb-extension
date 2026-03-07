@@ -98,6 +98,15 @@ export function ListingCard({ listing, snapshots, selected, onSelect, onDelete }
     }
   };
 
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.location.hostname !== 'localhost') {
+      alert('Demo mode: deletion is disabled on the live dashboard. Run the project locally to test full functionality.');
+      return;
+    }
+    setShowDeleteModal(true);
+  };
+  
 return (
     <div style={{ position: 'relative', marginBottom: 10 }}>
       <button
@@ -182,10 +191,7 @@ return (
       <button
         type="button"
         aria-label="Delete listing"
-        onClick={(e) => {
-          e.stopPropagation(); // Prevents card selection
-          setShowDeleteModal(true);
-        }}
+        onClick={handleDeleteClick}
         onMouseEnter={() => setDeleteHover(true)}
         onMouseLeave={() => setDeleteHover(false)}
         style={{
