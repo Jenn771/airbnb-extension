@@ -13,6 +13,7 @@
   "permissions": ["scripting", "tabs", "storage"],
   "host_permissions": [
     "https://www.airbnb.com/*",
+    "https://airbnb-extension-production.up.railway.app/*",
     "http://localhost:3000/*",
     "http://127.0.0.1:3000/*"
   ],
