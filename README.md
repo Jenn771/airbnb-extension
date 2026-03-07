@@ -1,157 +1,151 @@
-# Airbnb Best Dates Finder
+# Airbnb Price Tracker
 
-A Chrome extension that automatically finds the cheapest available dates for Airbnb listings, saving you time and money by scanning multiple date combinations across your selected months.
+A **Chrome extension** and **web dashboard** that scans Airbnb listings to find the cheapest available dates and tracks price changes over time.
 
-## Overview
-This extension solves the tedious process of manually checking each Airbnb listing's calendar to find the best dates. It integrates with Airbnb's **flexible date search**, allowing users to quickly identify the most affordable options across multiple listings.
+The extension adds a button to each listing on Airbnb's search results page. When clicked, it opens the listing in a background tab, scans the calendar across your selected months and trip length, and finds the cheapest available dates. Results are saved to a PostgreSQL database, where a React dashboard displays price history and trends across every check.
 
-<img src="assets/popup.png" alt="Extension Interface" width="200">
-<img src="assets/demo.gif" alt="Extension Demo" width="600">
+
+## Extension
+
+<img src="assets/popup.png" alt="Extension popup" width="200">
+
+<img src="assets/demo.gif" alt="Extension in action" width="600">
+
+## Live Dashboard
+
+**[View the Live Dashboard](https://enthusiastic-contentment-production-66a6.up.railway.app)**
+
+<img src="assets/dashboard.gif" alt="Dashboard demo" width="600">
+
+> The live dashboard is read-only. Delete functionality is disabled to preserve demo data and is enabled when running locally.
+
 
 ## Key Features
-- **Automatic calendar analysis** - Opens listings in focused background tabs to analyze calendar data
-- **Flexible date optimization** - Works with Airbnb's "Weekend" and "Week" filters or custom night counts
-- **Queue processing** - Handles multiple listings one at a time with controlled tab management
-- **Real-time UI synchronization** - Buttons adapt to filter changes, window resizing, and pagination
-- **MutationObserver + debounce** - Detects Airbnb's React-based DOM changes
-- **User feedback** - Buttons update with statuses (`Queued`, `Processing`, `Best Price`, `Error`)
-- **Month detection** - Determines target months from Airbnb UI or defaults to next 3 months
 
-### Technical Challenges Solved
-1. **Dynamic SPA handling**: Airbnb's React-based site required MutationObserver to detect content updates
-2. **Calendar data extraction**: Must focus tabs to trigger Airbnb's lazy-loading calendar content
-3. **Sequential processing**: Queue system ensures multiple listings are processed without browser overload
-4. **Event handling conflicts**: Prevents Airbnb's navigation events from interfering with extension buttons
+### Chrome Extension
+- **Calendar analysis** — opens listings in focused background tabs to scan calendar data
+- **Flexible date optimization** — works with Airbnb's "Weekend" and "Week" filters or custom night counts
+- **Queue processing** — handles multiple listings one at a time with controlled tab management
+- **Real-time UI synchronization** — buttons adapt to filter changes, window resizing, and pagination
+- **User feedback** — buttons update with statuses (`Queued`, `Processing`, `Best Price`, `Error`)
+- **Month detection** — determines target months from Airbnb UI or defaults to next 3 months
 
-## Installation
-1. Clone this repository to your local machine.
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable **Developer mode**
-4. Click **"Load unpacked"** and select the project folder
-5. The extension icon should appear in your Chrome toolbar
+### Dashboard
+- **Price history chart** — line chart showing price changes over time per search context
+- **Trend indicators** — Rising, Dropping, or Stable based on the last two price checks
+- **Search context filtering** — view price history by trip length and month combination
 
 ## How to Use
 
 ### Step 1: Set Up Airbnb Search
 1. Go to Airbnb and click **"Flexible"** in the date picker
 2. Choose **"Weekend"** or **"Week"** (Monthly stays not supported)
-3. Optionally select specific months to search within (if none selected, extension will check the next 3 months)
+3. Optionally select specific months (if none selected, the extension checks the next 3 months)
 4. Run your search normally
 
-### Step 2: Configure Extension
+### Step 2: Configure the Extension
 1. Click the extension icon to open the popup
-2. Enter your desired number of nights (1-7)
-3. Choose flexibility option:
-   - **Use Airbnb's trip length**: Respects Airbnb's selected duration (Weekend = 2 nights Friday-Sunday, Week = 5 nights Sunday-Friday)
-   - **Use custom trip length**: Uses your specified night count with any months selected
+2. Enter your desired number of nights (1–7)
+3. Choose a flexibility option:
+   - **Use Airbnb's trip length** — respects Airbnb's selected duration (Weekend = 2 nights Friday–Sunday, Week = 5 nights Sunday–Friday)
+   - **Use custom trip length** — uses your specified night count with any months selected
 4. Click **"Find Best Dates"**
 
 ### Step 3: Analyze Listings
-- Buttons appear on each listing card after the extension runs:
-  - "Check Best Available Dates" (when using Airbnb's trip length)
-  - "Check Best N-Night Dates" (when using custom trip length)
-- Click buttons for listings you want to analyze - they're added to a processing queue
-- Extension processes **one listing at a time**, opening each in a focused background tab to analyze calendar data
-- Results display on the button showing the cheapest available dates and total price
+- Buttons appear on each listing card on the search results page
+- Click a button to add that listing to the processing queue
+- The extension opens each listing in a background tab, scans the calendar, and shows the cheapest available dates and total price on the button
+
+### Step 4: View the Dashboard
+- Open the [live dashboard](https://enthusiastic-contentment-production-66a6.up.railway.app) or `http://localhost:5173` if running locally
+- Listings you've checked appear automatically with their price history and trends
+
+
+## Installation
+
+### Chrome Extension
+1. Clone this repository
+2. Open Chrome and navigate to `chrome://extensions/`
+3. Enable **Developer mode**
+4. Click **"Load unpacked"** and select the `extension/` folder
+5. The extension icon will appear in your Chrome toolbar
+
+The extension automatically posts data to the deployed backend. No additional setup is required to use the live dashboard.
+
+### Local Development (Full Stack)
+
+**Backend**
+```
+cd server
+npm install
+# Create .env with DATABASE_URL=your_postgres_url and PORT=3000
+npm run dev
+```
+
+**Frontend Dashboard**
+```
+cd client
+npm install
+# Vite proxies /api to localhost:3000 automatically
+npm run dev
+```
+
+**Extension**
+1. Open `extension/src/scripts/background.js`
+2. Update `API_BASE_URL` to `http://localhost:3000/api`
+3. Reload the extension in `chrome://extensions/`
+
+> `VITE_API_URL` is optional locally. The Vite proxy automatically routes `/api` to `localhost:3000`.
+
 
 ## Technical Architecture
 
-### Core Components
-- **popup.html/js**: User interface for configuration with input validation
-- **content.js**: DOM manipulation, button injection, queue management
-- **background.js**: Tab management, calendar navigation, price extraction algorithms
-- **helpers/calendarHelpers.js**: Calendar navigation utilities
-- **searchModes/**: Search algorithm implementations
-  - `findWeekendCombinations.js`: Weekend-specific logic
-  - `findWeekCombinations.js`: Week-specific logic
-  - `findNNightCombinations.js`: Custom night count logic
+### Stack
+| Layer | Technology |
+|---|---|
+| Extension | JavaScript, Chrome Extension APIs |
+| Backend API | Node.js, Express, TypeScript |
+| Database | PostgreSQL |
+| Frontend Dashboard | React, TypeScript, Vite, Recharts |
+| Deployment | Railway |
 
-### Search Modes
+### How It's Built
 
-#### Weekend Mode (Airbnb's Weekend Filter)
-Finds 2-night Friday-Sunday combinations across selected months, including cross-month weekends that span from the end of one month to the beginning of the next.
+The extension has three main scripts — `content.js` injects buttons into Airbnb's search results page, `background.js` handles tab management and API posting, and the `searchModes/` folder contains the calendar scanning algorithms for each trip type.
 
-#### Week Mode (Airbnb's Week Filter)
-Finds 5-night Sunday-Friday combinations across selected months
+The backend is a small Express API. `listings.ts` handles fetching all listings, saving new price snapshots from the extension, and deleting listings. `snapshots.ts` handles fetching price history for a specific listing. Both the listing upsert and snapshot insert run in a single database transaction to prevent partial writes.
 
-#### Custom N-Night Mode
-Searches for any N-night consecutive available periods within the selected months, ignoring Airbnb's trip length restrictions. Handles same-week, cross-week, and cross-month combinations.
+The React dashboard fetches all listings and their price history on load, groups snapshots by search context, and refreshes automatically when you switch back to the tab.
 
-### Key Technical Features
 
-#### Tab Management
-- **Sequential processing**: Only one listing analyzed at a time to prevent browser overload
-- **Focused tab requirement**: Each listing tab must be focused for Airbnb's dynamic calendar to load properly
-- **Automatic cleanup**: Background tabs are closed after analysis completes
+## Technical Challenges
 
-#### Calendar Analysis Algorithms
-```javascript
-// Different search modes based on user selection
-if (message.mode === "respect") {
-    if (message.tripLength.includes("weekend_trip")) {
-        const weekendResults = await findWeekendCombinations(tabId, message.months);
-    } else if (message.tripLength.includes("one_week")) {
-        const weekResults = await findWeekCombinations(tabId, message.months);
-    }
-} else if (message.mode === "ignore") {
-    const flexibleResults = await findNNightCombinations(tabId, message.months, message.nights);
-}
-```
+### Extension
+- **Dynamic SPA Handling** — Airbnb's search page is React-based, so the DOM changes without a full page reload. MutationObserver watches for these changes and re-injects buttons after navigation or filter updates
+- **Calendar Data Extraction** — Airbnb only loads calendar data when a listing tab is focused. The extension manages tab focus to ensure the calendar is loaded before scanning begins
+- **Sequential Queue Processing** — when a user queues multiple listings, they're processed one at a time to avoid opening too many tabs and overloading the browser
+- **Search Context Race Condition** — the user's selected trip type and months are captured when a listing is queued, not when the API call is made. Without this, changing filters mid-queue would attach the wrong context to a result
 
-#### Dynamic UI Management & Real-time State Synchronization
-```javascript
-// MutationObserver detects Airbnb's React updates
-observer = new MutationObserver((mutations) => {
-    // Detects new listings, filter changes, pagination
-    if (shouldReprocess && desiredNights > 0) {
-        handlePageChange();
-    }
-});
-```
+### Backend & Database
+- **Atomic Writes** — saving a price check involves upserting a listing and inserting a snapshot. These run in a single transaction so a failure midway doesn't leave incomplete data
+- **Schema Auto-Initialization** — the server runs `schema.sql` on startup, which meant no manual database setup was needed when deploying to Railway for the first time
+- **CORS for Chrome Extensions** — Chrome extensions have dynamic IDs, so the CORS config allows any `chrome-extension://` origin rather than hardcoding a specific ID
 
-Features include:
-- **Filter change detection**: Automatically updates when users modify Airbnb search parameters
-- **Button updates**: All listing buttons update immediately when user changes nights or options
-- **Window resize handling**: Buttons reappear and adapt to layout changes
+### Frontend
+- **Search Context Grouping** — price snapshots are grouped by trip type and month combination so each context (e.g. "7 Nights · April") has its own chart and history table rather than mixing all checks together
+
 
 ## Requirements & Limitations
-
-### Requirements
-- Chrome browser
+- Chrome browser required
 - Airbnb search must use **Flexible dates**
-- Trip length must be **Weekend** or **Week** (not Monthly)
+- Trip length must be **Weekend** or **Week** (Monthly not supported)
+- Fixed date searches are not compatible
 
-### Limitations
-- Monthly stays not supported (different pricing structure)
-- Fixed date searches not compatible
-- Only works with Chrome-based browsers
-
-## Troubleshooting
-
-**Button shows "Error - Try Again"**
-- Listing page failed to load properly - click to retry
-- Check internet connection
-
-**Buttons not appearing**
-- Verify extension is enabled in Chrome
-- Ensure you're on an Airbnb search results page with flexible dates selected
-
-## Browser Compatibility
-- **Chrome**: Fully supported 
-- **Firefox / Safari**: Not supported (Chrome-specific APIs)  
-
-## Technical Skills
-- **Chrome Extension APIs**: tabs, storage, messaging, content scripts
-- **JavaScript**: async/await, DOM manipulation, event handling, MutationObserver
-- **DOM interaction**: Extracting data from React SPA with lazy-loading
-- **Queue management**: Sequential tab processing with status updates
-- **Browser automation**: Controlled tab focusing and navigation
-- **UI/UX Design**: Intuitive popup design with real-time validation
 
 ## Privacy & Data Handling
-- **Local processing only**: All calendar analysis happens in your browser
-- **Temporary data only**: Date and price information is only stored temporarily during analysis
-- **Respects rate limits**: Built-in delays between operations to be respectful to Airbnb's servers
+- All calendar analysis happens locally in your browser. No Airbnb account data is collected
+- Price data (listing URL, name, dates, total price) is stored in PostgreSQL to enable the history feature
+- Built-in delays keep requests respectful of Airbnb's servers
 
 ## Disclaimer
 This extension is not affiliated with, endorsed, or sponsored by Airbnb. It is an independent tool designed to help users find better deals on their bookings.
