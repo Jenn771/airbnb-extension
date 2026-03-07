@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   fetchListings,
   fetchPriceHistory,
@@ -51,19 +51,28 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const hasLoadedOnce = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
-
-    async function load() {
+  
+    async function load(isBackground = false) {
       try {
-        setLoading(true);
-        setError(null);
+        // Only show global loading spinner on the very first mount
+        if (!isBackground && !hasLoadedOnce.current) {
+          setLoading(true);
+        }
+        
         const list = await fetchListings();
         if (cancelled) return;
-        setListings(list);
-        if (list.length > 0) setSelectedListing((prev) => prev ?? list[0]);
 
+        setListings(list);
+        hasLoadedOnce.current = true;
+        
+        if (list.length > 0) {
+          setSelectedListing((prev) => prev ?? list[0]);
+        }
+    
         const history: Record<string, PriceSnapshot[]> = {};
         await Promise.all(
           list.map(async (l) => {
@@ -71,17 +80,37 @@ export default function App() {
             if (!cancelled) history[l.airbnb_url] = snapshots;
           })
         );
-        if (!cancelled) setHistoryByUrl(history);
+        
+        if (!cancelled) {
+          setHistoryByUrl(history);
+          setError(null);
+        }
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load');
+        if (!cancelled && !isBackground) {
+          setError(e instanceof Error ? e.message : 'Failed to load');
+        }
+        console.error("Background refresh failed:", e);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled && !isBackground) {
+          setLoading(false);
+        }
       }
     }
 
     load();
+  
+    // Re-fetch data whenever the user returns to this tab
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        load(true); 
+      }
+    };
+  
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+  
     return () => {
       cancelled = true;
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
