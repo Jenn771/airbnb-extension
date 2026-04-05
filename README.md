@@ -23,7 +23,7 @@ The extension adds a button to each listing on Airbnb's search results page. Whe
 ## Key Features
 
 ### Chrome Extension
-- **Calendar analysis** — opens listings in focused background tabs to scan calendar data
+- **Calendar analysis** — opens listings in focused tabs to scan calendar data
 - **Flexible date optimization** — works with Airbnb's "Weekend" and "Week" filters or custom night counts
 - **Queue processing** — handles multiple listings one at a time with controlled tab management
 - **Real-time UI synchronization** — buttons adapt to filter changes, window resizing, and pagination
