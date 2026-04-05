@@ -2,7 +2,7 @@
 
 A **Chrome extension** and **web dashboard** that scans Airbnb listings to find the cheapest available dates and tracks price changes over time.
 
-The extension adds a button to each listing on Airbnb's search results page. When clicked, it opens the listing in a background tab, scans the calendar across your selected months and trip length, and finds the cheapest available dates. Results are saved to a PostgreSQL database, where a React dashboard displays price history and trends across every check.
+The extension adds a button to each listing on Airbnb's search results page. When clicked, it opens the listing in a focused tab, scans the calendar across your selected months and trip length, and finds the cheapest available dates.. Results are saved to a PostgreSQL database, where a React dashboard displays price history and trends across every check.
 
 
 ## Extension
@@ -141,6 +141,10 @@ The React dashboard fetches all listings and their price history on load, groups
 - Trip length must be **Weekend** or **Week** (Monthly not supported)
 - Fixed date searches are not compatible
 
+## What I'd improve next
+
+- Store **listing thumbnails locally** instead of relying on Airbnb's image URLs which can break over time
+- Add **price drop notifications** when a new manual scan finds a lower price than the previous check for the same search context
 
 ## Privacy & Data Handling
 - All calendar analysis happens locally in your browser. No Airbnb account data is collected
