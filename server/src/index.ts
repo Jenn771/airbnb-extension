@@ -14,7 +14,7 @@ app.use(cors({
     origin: (origin, callback) => {
         const allowed = [
             'https://www.airbnb.com',
-            'https://airbnb-extension.onrender.com',
+            'https://airbnb-extension.vercel.app',
             'http://localhost:5173',
         ];
         if (!origin || allowed.includes(origin) || origin.startsWith('chrome-extension://')) {
