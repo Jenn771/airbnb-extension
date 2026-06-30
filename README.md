@@ -13,7 +13,7 @@ The extension adds a button to each listing on Airbnb's search results page. Whe
 
 ## Live Dashboard
 
-**[View the Live Dashboard](https://enthusiastic-contentment-production-66a6.up.railway.app)**
+**[View the Live Dashboard](https://airbnb-extension.vercel.app)**
 
 <img src="assets/dashboard.gif" alt="Dashboard demo" width="600">
 
@@ -57,7 +57,7 @@ The extension adds a button to each listing on Airbnb's search results page. Whe
 - The extension opens each listing in a background tab, scans the calendar, and shows the cheapest available dates and total price on the button
 
 ### Step 4: View the Dashboard
-- Open the [live dashboard](https://enthusiastic-contentment-production-66a6.up.railway.app) or `http://localhost:5173` if running locally
+- Open the [live dashboard](https://airbnb-extension.vercel.app) or `http://localhost:5173` if running locally
 - Listings you've checked appear automatically with their price history and trends
 
 
