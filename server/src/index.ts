@@ -14,7 +14,7 @@ app.use(cors({
     origin: (origin, callback) => {
         const allowed = [
             'https://www.airbnb.com',
-            'https://enthusiastic-contentment-production-66a6.up.railway.app',
+            'https://airbnb-extension.onrender.com',
             'http://localhost:5173',
         ];
         if (!origin || allowed.includes(origin) || origin.startsWith('chrome-extension://')) {
